@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"></html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ファイルアップロード</title>
+</head>
+<body>
+<h1>ファイルをアップロードしてください</h1>
+<form action="/upload" method="post" enctype="multipart/form-data">
+  <input type="file" name="file" id="file" accept=".xls, .xlsx">
+  <br>
+  <input type="submit" value="インポート">
+</form>
+</body>
+</html>

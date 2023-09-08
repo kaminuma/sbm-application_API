@@ -1,16 +1,29 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"></html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>ファイルアップロード</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Management</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<h1>ファイルをアップロードしてください</h1>
-<form action="/upload" method="post" enctype="multipart/form-data">
-  <input type="file" name="file" id="file" accept=".xls, .xlsx">
-  <br>
-  <input type="submit" value="インポート">
+<h1>Task Management</h1>
+
+<!-- Excelファイルアップロードフォーム -->
+<form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data">
+  <label for="fileInput">Excelファイルを選択してアップロード：</label>
+  <input type="file" id="fileInput" name="file" accept=".xlsx, .xls">
+  <button type="submit">アップロード</button>
 </form>
+
+<!-- タスク一覧表示 -->
+<div id="taskList">
+  <h2>タスク一覧</h2>
+  <ul id="taskItems">
+    <!-- タスクがここに表示される -->
+  </ul>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +10,7 @@
 <h1>Task Management</h1>
 
 <!-- Excelファイルアップロードフォーム -->
-<form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data">
+<form id="uploadForm" th:action="@{/upload}" method="post" enctype="multipart/form-data">
   <label for="fileInput">Excelファイルを選択してアップロード：</label>
   <input type="file" id="fileInput" name="file" accept=".xlsx, .xls">
   <button type="submit">アップロード</button>

@@ -10,8 +10,8 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     ports:
-      - # ホストでMySQLを起動している場合、3306意外のポートをコンテナの3306ポートにマッピング (ex 3307:3306)
       - "3306:3306"
+      # ホストでMySQLを起動している場合、3306意外のポートをコンテナの3306ポートにマッピング (ex 3307:3306)
     volumes:
       - mysql-data:/var/lib/mysql
 

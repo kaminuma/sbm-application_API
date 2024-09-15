@@ -2,11 +2,10 @@ spring:
   thymeleaf:
     prefix: file:src/main/resources/templates/
   datasource:
-    url: jdbc:mysql://localhost:3306/import_app
-    username: user
-    password: password
+    url: jdbc:mysql://localhost:3306/importApp
+    username: root
+    password: rootpassword
     driver-class-name: com.mysql.cj.jdbc.Driver
-    data-source-class-name: org.h2.Driver
   jpa:
     properties:
       hibernate:
@@ -16,3 +15,9 @@ spring:
       enabled: true
       max-file-size: 10MB
       max-request-size: 10MB
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    baseline-version: 1

@@ -29,8 +29,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 	compileOnly 'org.projectlombok:lombok:1.18.26'
 	annotationProcessor 'org.projectlombok:lombok:1.18.26'
-	implementation 'mysql:mysql-connector-java:8.0.33' // バージョンは適宜変更}
-	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'mysql:mysql-connector-java:8.0.33' // バージョンは適宜変更
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.4'
 	implementation 'org.flywaydb:flyway-core:7.15.0'
 	runtimeOnly 'mysql:mysql-connector-java:8.0.33' // MySQL 8.x 用のドライバー

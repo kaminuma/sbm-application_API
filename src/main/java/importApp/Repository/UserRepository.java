@@ -1,6 +1,6 @@
-package importApp.importApp.Repository;
+package importApp.Repository;
 
-import importApp.importApp.Entity.UserEntity;
+import importApp.Entity.UserEntity;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

@@ -1,6 +1,6 @@
 //package importApp.importApp.Controller;
 //
-//import importApp.importApp.Entity.UserEntity;
+//import importApp.Entity.UserEntity;
 //import importApp.importApp.Security.UserService;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.stereotype.Controller;

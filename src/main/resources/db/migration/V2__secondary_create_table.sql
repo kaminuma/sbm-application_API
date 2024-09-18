@@ -5,7 +5,7 @@ CREATE TABLE `tasks` (
     `task_name` VARCHAR(100) NOT NULL,
     `description` TEXT,
     `due_date` DATE,
-    `priority` INT,
+    `priority` VARCHAR(100),
     `status` VARCHAR(50),
     `project_id` INT,
     `user_id` INT,

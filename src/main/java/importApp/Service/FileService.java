@@ -1,18 +1,21 @@
-package importApp.importApp.Service;
+package importApp.Service;
 
-import importApp.importApp.Entity.taskEntity;
+import importApp.Entity.taskEntity;
+import importApp.Mapper.FileUploadMapper;
 import org.apache.poi.ss.usermodel.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 
 @Service
 public class FileService {
+
+    @Autowired
+    FileUploadMapper fileUploadMapper;
 
     // ファイルのフォーマットを確認
     public boolean isValidFormat(MultipartFile file) {
@@ -28,15 +31,13 @@ public class FileService {
     }
 
     // ファイルデータの処理
-    public List<taskEntity> parseExcelFile(MultipartFile file) {
+    public String parseExcelFile(MultipartFile file) {
         try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0); // 1列目のシートを選択
 
-            List<taskEntity> tasks = new ArrayList<>();
-
             Iterator<Row> iterator = sheet.iterator();
 
-// ヘッダ行をスキップする
+            // ヘッダ行をスキップする
             if (iterator.hasNext()) {
                 iterator.next();
             }
@@ -69,12 +70,11 @@ public class FileService {
                 long userId = (long) userIdCell.getNumericCellValue();
 
                 taskEntity task = new taskEntity(taskName, description, dueDate, priority, status, projectId, userId);
-                tasks.add(task);
+
+                fileUploadMapper.insertTask(task);
             }
 
-            // tasksリストをデータベースに保存するか、必要に応じて処理を行う
-
-            return tasks;
+            return "success";
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

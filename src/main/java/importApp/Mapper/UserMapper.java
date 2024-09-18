@@ -1,8 +1,8 @@
-package importApp.importApp.Mapper;
+package importApp.Mapper;
 
+import importApp.Entity.UserEntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import importApp.importApp.Entity.UserEntity;
 
 @Mapper
 public interface UserMapper {

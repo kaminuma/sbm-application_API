@@ -1,12 +1,15 @@
-package importApp.importApp.Entity;
+package importApp.Entity;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.Date;
 
+@Getter
+@Setter
 @Entity
-@Table(name = "tasks")
 @Data
 public class taskEntity {
     @Id

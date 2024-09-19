@@ -1,7 +1,7 @@
-package importApp.Controller;
+package importApp.controller;
 
 
-import importApp.Service.FileService;
+import importApp.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.PostMapping;

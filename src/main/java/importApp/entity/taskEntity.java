@@ -1,4 +1,4 @@
-package importApp.Entity;
+package importApp.entity;
 
 import lombok.Data;
 import lombok.Getter;

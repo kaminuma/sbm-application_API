@@ -23,7 +23,7 @@ spring:
     baseline-version: 1
 
   mybatis:
-    mapper-locations: classpath:Mapper/*.xml
     type-aliases-package: importApp.Entity
+    mapper-locations: classpath:importApp/mapper/*.xml
     configuration:
       map-underscore-to-camel-case: true

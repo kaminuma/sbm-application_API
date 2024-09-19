@@ -1,7 +1,7 @@
-package importApp.Service;
+package importApp.service;
 
-import importApp.Entity.taskEntity;
-import importApp.Mapper.FileUploadMapper;
+import importApp.entity.taskEntity;
+import importApp.mapper.FileUploadMapper;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -18,11 +18,13 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      db:
+      mysql:
         image: mysql:8
         env:
           MYSQL_ROOT_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           MYSQL_DATABASE: importApp
+          MYSQL_USER: user
+          MYSQL_PASSWORD: password
         ports:
           - 3306:3306
 
@@ -38,6 +40,13 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+
+      - name: Wait for MySQL to be ready
+        run: |
+             until mysql -h 127.0.0.1 -P 3306 -u root -p${{ secrets.DOCKER_PASSWORD }} -e ""; do
+             echo "Waiting for MySQL to be ready..."
+             sleep 5
+             done
 
       - name: Set up MySQL
         run: ./gradlew -D flyway.user=root -D flyway.password=$PASSWORD -D flyway.baselineOnMigrate=true flywayMigrate -i

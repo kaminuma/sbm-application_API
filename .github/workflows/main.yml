@@ -1,0 +1,47 @@
+name: Java CI with Gradle
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+env:
+  HOST: localhost
+  DATABASE: importApp
+  USER: root
+  PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: importApp
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+        ports:
+          - 3306:3306
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Set up MySQL
+        run: ./gradlew -Dflyway.user=root -Dflyway.password=rootpassword -Dflyway.baselineOnMigrate=true flywayMigrate -i
+
+      - name: Build with Gradle
+        run: ./gradlew build

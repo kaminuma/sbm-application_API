@@ -41,7 +41,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Set up MySQL
-        run: ./gradlew -Dflyway.user=root -Dflyway.password=$PASSWORD -Dflyway.baselineOnMigrate=true flywayMigrate -i
+        run: ./gradlew -Dflyway.user=root -Dflyway.password=rootpassword -Dflyway.baselineOnMigrate=true flywayMigrate -i
 
       - name: Build with Gradle
         run: ./gradlew build

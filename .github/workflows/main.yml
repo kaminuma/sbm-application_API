@@ -23,6 +23,7 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: rootpassword
           MYSQL_DATABASE: importApp
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
         ports:
           - 3306:3306
 

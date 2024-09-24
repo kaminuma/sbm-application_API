@@ -7,10 +7,23 @@ on:
   pull_request:
     branches:
       - main
-
+env:
+  HOST: localhost
+  DATABASE: importApp
+  USER: ${{ secrets.DOCKER_USERNAME }}
+  PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.DOCKER_USERNAME }}
+        ports:
+          - 3306:3306
 
     steps:
       - name: Checkout repository
@@ -24,6 +37,9 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+
+      - name: Set up MySQL
+        run: ./gradlew -D flyway.user=${{ secrets.DOCKER_USERNAME }} -D flyway.password=${{ secrets.DOCKER_PASSWORD }} -D flyway.baselineOnMigrate=true flywayMigrate -i
 
       - name: Build with Gradle
         run: ./gradlew build

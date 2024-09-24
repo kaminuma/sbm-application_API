@@ -8,10 +8,11 @@ on:
     branches:
       - main
 env:
-  HOST: db
+  HOST: localhost
   DATABASE: importApp
-  USER: ${{ secrets.DOCKER_USERNAME }}
+  USER: root
   PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -39,7 +40,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Set up MySQL
-        run: ./gradlew -D flyway.user=${{ secrets.DOCKER_USERNAME }} -D flyway.password=${{ secrets.DOCKER_PASSWORD }} -D flyway.baselineOnMigrate=true flywayMigrate -i
+        run: ./gradlew -D flyway.user=root -D flyway.password=$PASSWORD -D flyway.baselineOnMigrate=true flywayMigrate -i
 
       - name: Build with Gradle
         run: ./gradlew build

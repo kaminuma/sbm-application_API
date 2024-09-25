@@ -2,19 +2,19 @@ package importApp.entity;
 
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.Date;
 
-@Getter
-@Setter
 @Entity
 @Data
-public class taskEntity {
+@NoArgsConstructor
+public class TaskEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long taskId;
     private String taskName;
     private String description;
     private Date dueDate;
@@ -23,7 +23,7 @@ public class taskEntity {
     private long projectId;
     private long userId;
 
-    public taskEntity(String taskName, String description, Date dueDate, String priority, String status, long projectId, long userId) {
+    public TaskEntity(String taskName, String description, Date dueDate, String priority, String status, long projectId, long userId) {
         this.taskName = taskName;
         this.description = description;
         this.dueDate = dueDate;

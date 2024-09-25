@@ -1,6 +1,6 @@
 package importApp.service;
 
-import importApp.entity.taskEntity;
+import importApp.entity.TaskEntity;
 import importApp.mapper.FileUploadMapper;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +69,7 @@ public class FileService {
                 long projectId = (long) projectIdCell.getNumericCellValue();
                 long userId = (long) userIdCell.getNumericCellValue();
 
-                taskEntity task = new taskEntity(taskName, description, dueDate, priority, status, projectId, userId);
+                TaskEntity task = new TaskEntity(taskName, description, dueDate, priority, status, projectId, userId);
 
                 fileUploadMapper.insertTask(task);
             }

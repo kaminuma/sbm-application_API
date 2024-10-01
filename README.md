@@ -1,4 +1,4 @@
-# sbmm-application-API
+# sbm-application-API
 Schedule bulk management application API
 
 This application was created with the aim of being a web application that manages schedules all at once.

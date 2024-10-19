@@ -64,12 +64,23 @@ public class FileService {
                 String taskName = taskNameCell.getStringCellValue();
                 String description = descriptionCell.getStringCellValue();
                 Date dueDate = dueDateCell.getDateCellValue();
+                Date createDate = null;
+                Date updateDate = null;
                 String priority = priorityCell.getStringCellValue();
                 String status = statusCell.getStringCellValue();
                 long projectId = (long) projectIdCell.getNumericCellValue();
                 long userId = (long) userIdCell.getNumericCellValue();
 
-                TaskEntity task = new TaskEntity(taskName, description, dueDate, priority, status, projectId, userId);
+                TaskEntity task = new TaskEntity(
+                        taskName,
+                        description,
+                        dueDate,
+                        createDate,
+                        updateDate,
+                        priority,
+                        status,
+                        projectId,
+                        userId);
 
                 fileUploadMapper.insertTask(task);
             }

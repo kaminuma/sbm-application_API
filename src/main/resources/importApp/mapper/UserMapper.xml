@@ -9,4 +9,12 @@
         VALUES (#{username}, #{password}, #{email})
     </insert>
 
+    <select id="findByEmail" resultType="importApp.entity.UserEntity">
+        SELECT * FROM users WHERE email = #{email}
+    </select>
+
+    <select id="findByUsername" resultType="importApp.entity.UserEntity">
+        SELECT * FROM users WHERE username = #{username}
+    </select>
+
 </mapper>

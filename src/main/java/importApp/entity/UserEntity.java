@@ -1,21 +1,28 @@
 package importApp.entity;
+
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
-
+@Data
 @Entity
 @Table(name = "users")
-@Data
-@NoArgsConstructor
 public class UserEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long user_id;
 
+    @NotBlank
+    @Size(min = 3, max = 50)
     private String username;
-    private String password;
+
+    @NotBlank
+    @Email
     private String email;
+
+    @NotBlank
+    @Size(min = 8)
+    private String password;
 }

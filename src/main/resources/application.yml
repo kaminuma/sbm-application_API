@@ -27,3 +27,6 @@ spring:
     mapper-locations: classpath:importApp/mapper/*.xml
     configuration:
       map-underscore-to-camel-case: true
+
+jwt:
+  secret: yourSecretKeyHere

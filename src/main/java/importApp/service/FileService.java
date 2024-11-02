@@ -1,6 +1,6 @@
 package importApp.service;
 
-import importApp.entity.TaskEntity;
+import importApp.entity.ActivityEntity;
 import importApp.mapper.FileUploadMapper;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,22 +8,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Objects;
 
 @Service
 public class FileService {
 
     @Autowired
-    FileUploadMapper fileUploadMapper;
+    private FileUploadMapper fileUploadMapper;
 
     // ファイルのフォーマットを確認
     public boolean isValidFormat(MultipartFile file) {
         try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
             // フォーマットが正しいかの確認ロジックを追加
-            // 例: シート名やセルの内容の確認
-            // ...
-
             return true; // フォーマットが正しい場合
         } catch (Exception e) {
             return false; // フォーマットが正しくない場合
@@ -45,44 +46,64 @@ public class FileService {
             while (iterator.hasNext()) {
                 Row row = iterator.next();
 
-                // A列のセルを取得
-                Cell taskNameCell = row.getCell(0); // A列のセルを取得
-
-                if (taskNameCell == null || taskNameCell.getCellType() != CellType.STRING || taskNameCell.getStringCellValue().isEmpty()) {
-                    // A列が空白の場合、ループを終了
+                // 必須列のセルを取得
+                Cell dateCell = row.getCell(0); // A列: 日付
+                if (dateCell == null) {
+                    // A列が空白または日付でない場合、ループを終了
                     break;
                 }
 
-                Cell descriptionCell = row.getCell(1);
-                Cell dueDateCell = row.getCell(2);
-                Cell priorityCell = row.getCell(3);
-                Cell statusCell = row.getCell(4);
-                Cell projectIdCell = row.getCell(5);
-                Cell userIdCell = row.getCell(6);
+                Cell nameCell = row.getCell(1); // B列: アクティビティ名
+                if (nameCell == null || nameCell.getCellType() != CellType.STRING || nameCell.getStringCellValue().isEmpty()) {
+                    // B列が空白の場合、ループを終了
+                    break;
+                }
 
-                // セルからデータを取得してTaskオブジェクトを作成
-                String taskName = taskNameCell.getStringCellValue();
-                String description = descriptionCell.getStringCellValue();
-                Date dueDate = dueDateCell.getDateCellValue();
-                Date createDate = null;
-                Date updateDate = null;
-                String priority = priorityCell.getStringCellValue();
-                String status = statusCell.getStringCellValue();
-                long projectId = (long) projectIdCell.getNumericCellValue();
-                long userId = (long) userIdCell.getNumericCellValue();
+                Cell descriptionCell = row.getCell(2); // C列: 説明
+                Cell startTimeCell = row.getCell(3); // D列: 開始時間
+                Cell endTimeCell = row.getCell(4); // E列: 終了時間
 
-                TaskEntity task = new TaskEntity(
-                        taskName,
+                // セルからデータを取得してActivityオブジェクトを作成
+                String name = nameCell.getStringCellValue();
+                String description = descriptionCell != null && descriptionCell.getCellType() == CellType.STRING
+                        ? descriptionCell.getStringCellValue() : "";
+
+                LocalTime startTime = null;
+                LocalTime endTime = null;
+
+                // D列の開始時間を処理
+                if (startTimeCell != null && startTimeCell.getCellType() == CellType.NUMERIC) {
+                    // Excelの日付/時間からLocalTimeを取得
+                    Date startDate = startTimeCell.getDateCellValue();
+                    startTime = startDate.toInstant()
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalTime();
+                }
+
+                // E列の終了時間を処理
+                if (endTimeCell != null && endTimeCell.getCellType() == CellType.NUMERIC) {
+                    Date endDate = endTimeCell.getDateCellValue();
+                    endTime = endDate.toInstant()
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalTime();
+                }
+
+                // 日付を取得して、ActivityEntityを作成
+                Date date = dateCell.getDateCellValue(); // A列から日付を取得
+
+                ActivityEntity activity = new ActivityEntity(
+                        9999, // userIdのサンプル値（必要に応じて適切な値に変更）
+                        date, // dateは現在の日時
+                        startTime,
+                        endTime,
+                        name,
                         description,
-                        dueDate,
-                        createDate,
-                        updateDate,
-                        priority,
-                        status,
-                        projectId,
-                        userId);
+                        null,        // createdByはひとまずnullでDBインサート
+                        null         // updatedByもひとまずnullでDBインサート
+                );
 
-                fileUploadMapper.insertTask(task);
+                // データを挿入
+                fileUploadMapper.insertActivity(activity);
             }
 
             return "success";

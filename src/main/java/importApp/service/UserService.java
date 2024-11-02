@@ -23,8 +23,8 @@ public class UserService {
     }
 
     // ログインユーザーを認証するメソッド
-    public UserEntity loginUser(String email, String password) {
-        UserEntity user = userMapper.findByUsername(email);
+    public UserEntity loginUser(String username, String password) {
+        UserEntity user = userMapper.findByUsername(username);
         if (user != null && bCryptPasswordEncoder.matches(password, user.getPassword())) {
             return user; // 認証成功
         }

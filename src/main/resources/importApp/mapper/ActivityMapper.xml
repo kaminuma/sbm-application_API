@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="importApp.mapper.ActivityMapper">
+    <resultMap id="ActivityEntityResultMap" type="importApp.entity.ActivityEntity">
+        <id property="activityId" column="activity_id" />
+        <result property="userId" column="user_id" />
+        <result property="date" column="date" />
+        <result property="startTime" column="start_time" />
+        <result property="endTime" column="end_time" />
+        <result property="name" column="name" />
+        <result property="description" column="description" />
+        <result property="createdBy" column="created_by" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedBy" column="updated_by" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="activityId">
+        INSERT INTO activities (user_id, date, start_time, end_time, description, created_by, updated_by)
+        VALUES (#{userId}, #{date}, #{startTime}, #{endTime}, #{name}, #{description}, #{createdBy}, #{updatedBy})
+    </insert>
+
+    <select id="findActivitiesByUserId" parameterType="long" resultMap="ActivityEntityResultMap">
+        SELECT * FROM activities
+        WHERE user_id = #{userId}
+    </select>
+</mapper>

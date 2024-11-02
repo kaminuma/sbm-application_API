@@ -1,6 +1,6 @@
 package importApp.mapper;
 
-import importApp.entity.TaskEntity;
+import importApp.entity.ActivityEntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
 import org.springframework.stereotype.Component;
@@ -10,9 +10,9 @@ import java.util.List;
 
 @Mapper
 @Component
-public interface TaskMapper {
+public interface ActivityMapper {
     @Options(useGeneratedKeys = true, keyProperty = "taskId")
-    void save(TaskEntity taskEntity);
+    void save(ActivityEntity taskEntity);
 
-    List<TaskEntity> findTaskByUserId(long userId);
+    List<ActivityEntity> findActivitiesByUserId(long userId);
 }

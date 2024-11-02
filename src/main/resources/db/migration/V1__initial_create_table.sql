@@ -2,18 +2,25 @@
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
     `user_id` INT AUTO_INCREMENT PRIMARY KEY,
-    `username` VARCHAR(50) NOT NULL UNIQUE,
+    `user_name` VARCHAR(50) NOT NULL UNIQUE,
     `password` VARCHAR(255) NOT NULL,
     `email` VARCHAR(100) NOT NULL UNIQUE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
 ;
 
--- create projects table
-DROP TABLE IF EXISTS `projects`;
-CREATE TABLE `projects` (
-    `project_id` INT AUTO_INCREMENT PRIMARY KEY,
-    `project_name` VARCHAR(255) NOT NULL,
+-- create activities table with auditing columns
+DROP TABLE IF EXISTS `activities`;
+CREATE TABLE `activities` (
+    `activity_id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
+    `date` DATE NOT NULL,
+    `start_time` TIME NOT NULL,
+    `end_time` TIME NOT NULL,
+    `name` VARCHAR(255) NOT NULL,
     `description` TEXT,
-    `user_id` INT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8
-;
+    `created_by` INT,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_by` INT,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8
+ ;

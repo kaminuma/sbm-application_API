@@ -1,7 +1,7 @@
 package importApp.service;
 
 import importApp.dto.ActivityDto;
-import importApp.entity.ActivityEntity;
+import importApp.entity.ActivityGetEntity;
 import importApp.entity.PostActivityEntity;
 import importApp.mapper.ActivityMapper;
 import importApp.model.PostRequest;
@@ -9,7 +9,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -33,7 +32,7 @@ public class ActivityService {
         return "success";
     }
 
-    public List<ActivityEntity> findActivitiesByUserId(long userId) {
+    public List<ActivityGetEntity> findActivitiesByUserId(long userId) {
         return activityMapper.findActivitiesByUserId(userId);
     }
 }

@@ -2,6 +2,7 @@ package importApp.controller;
 
 import importApp.dto.ActivityDto;
 import importApp.entity.ActivityEntity;
+import importApp.entity.ActivityGetEntity;
 import importApp.model.PostRequest;
 import importApp.service.ActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ public class ActivityController {
 
     @GetMapping
     public List<ActivityDto> findTasksByUserId(@RequestParam("userId") Long userId) {
-        List<ActivityEntity> activities = activityService.findActivitiesByUserId(userId);
+        List<ActivityGetEntity> activities = activityService.findActivitiesByUserId(userId);
 
         List<ActivityDto> activityDtos = activities.stream()
                 .map(activity -> new ActivityDto(

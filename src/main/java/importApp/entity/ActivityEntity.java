@@ -1,5 +1,6 @@
 package importApp.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -7,9 +8,9 @@ import javax.persistence.*;
 import java.time.LocalTime;
 import java.util.Date;
 
-@Entity
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class ActivityEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,7 +20,7 @@ public class ActivityEntity {
     private LocalTime startTime;
     private LocalTime endTime;
     private String name;
-    private String description;
+    private String contents;
     private Long createdBy;
     private Date createdAt;
     private Long updatedBy;
@@ -30,7 +31,7 @@ public class ActivityEntity {
                           LocalTime startTime,
                           LocalTime endTime,
                           String name,
-                          String description,
+                          String contents,
                           Long createdBy,
                           Long updatedBy) {
         this.userId = userId;
@@ -38,7 +39,7 @@ public class ActivityEntity {
         this.startTime = startTime;
         this.endTime = endTime;
         this.name = name;
-        this.description = description;
+        this.contents = contents;
         this.createdBy = createdBy;
         this.updatedBy = updatedBy;
     }

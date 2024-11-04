@@ -17,7 +17,7 @@ CREATE TABLE `activities` (
     `start_time` TIME NOT NULL,
     `end_time` TIME NOT NULL,
     `name` VARCHAR(255) NOT NULL,
-    `description` TEXT,
+    `contents` TEXT,
     `created_by` INT,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_by` INT,

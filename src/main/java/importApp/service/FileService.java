@@ -10,10 +10,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.Objects;
 
 @Service
 public class FileService {
@@ -59,14 +57,14 @@ public class FileService {
                     break;
                 }
 
-                Cell descriptionCell = row.getCell(2); // C列: 説明
+                Cell contentsCell = row.getCell(2); // C列: 説明
                 Cell startTimeCell = row.getCell(3); // D列: 開始時間
                 Cell endTimeCell = row.getCell(4); // E列: 終了時間
 
                 // セルからデータを取得してActivityオブジェクトを作成
                 String name = nameCell.getStringCellValue();
-                String description = descriptionCell != null && descriptionCell.getCellType() == CellType.STRING
-                        ? descriptionCell.getStringCellValue() : "";
+                String contents = contentsCell != null && contentsCell.getCellType() == CellType.STRING
+                        ? contentsCell.getStringCellValue() : "";
 
                 LocalTime startTime = null;
                 LocalTime endTime = null;
@@ -97,7 +95,7 @@ public class FileService {
                         startTime,
                         endTime,
                         name,
-                        description,
+                        contents,
                         null,        // createdByはひとまずnullでDBインサート
                         null         // updatedByもひとまずnullでDBインサート
                 );

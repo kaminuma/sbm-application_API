@@ -2,6 +2,7 @@ package importApp.controller;
 
 import importApp.dto.ActivityDto;
 import importApp.entity.ActivityEntity;
+import importApp.model.PostRequest;
 import importApp.service.ActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,9 +25,9 @@ public class ActivityController {
     private ActivityService activityService;
 
     @PostMapping
-    public ResponseEntity<String> createTask(@RequestBody ActivityEntity task) {
-        String createdTask = activityService.createActivity(task);
-        return new ResponseEntity<>(createdTask, HttpStatus.CREATED);
+    public ResponseEntity<String> postActivity(@RequestBody PostRequest postRequest) {
+        String createdActivity = activityService.createActivity(postRequest);
+        return new ResponseEntity<>(createdActivity, HttpStatus.CREATED);
     }
 
     @GetMapping
@@ -35,8 +36,9 @@ public class ActivityController {
 
         List<ActivityDto> activityDtos = activities.stream()
                 .map(activity -> new ActivityDto(
+                        (int) activity.getUserId(),
                         activity.getName(),
-                        activity.getDescription(),
+                        activity.getContents(),
                         formatDateTime(activity.getDate(), activity.getStartTime()), // 'YYYY-MM-DD HH:mm'形式
                         formatDateTime(activity.getDate(), activity.getEndTime())  // 'YYYY-MM-DD HH:mm'形式
                 ))

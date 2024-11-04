@@ -5,10 +5,10 @@
         <id property="activityId" column="activity_id" />
         <result property="userId" column="user_id" />
         <result property="date" column="date" />
-        <result property="startTime" column="start_time" />
-        <result property="endTime" column="end_time" />
-        <result property="name" column="name" />
-        <result property="description" column="description" />
+        <result property="start" column="start_time" />
+        <result property="end" column="end_time" />
+        <result property="title" column="name" />
+        <result property="contents" column="contents" />
         <result property="createdBy" column="created_by" />
         <result property="createdAt" column="created_at" />
         <result property="updatedBy" column="updated_by" />
@@ -16,8 +16,8 @@
     </resultMap>
 
     <insert id="save" useGeneratedKeys="true" keyProperty="activityId">
-        INSERT INTO activities (user_id, date, start_time, end_time, description, created_by, updated_by)
-        VALUES (#{userId}, #{date}, #{startTime}, #{endTime}, #{name}, #{description}, #{createdBy}, #{updatedBy})
+        INSERT INTO activities (user_id, date, start_time, end_time, name, contents, created_at, created_by, updated_at, updated_by)
+        VALUES (#{userId}, #{date}, #{start}, #{end}, #{title}, #{contents}, #{createdAt}, #{createdBy}, #{updatedAt}, #{updatedBy})
     </insert>
 
     <select id="findActivitiesByUserId" parameterType="long" resultMap="ActivityEntityResultMap">

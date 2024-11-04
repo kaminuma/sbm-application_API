@@ -1,18 +1,26 @@
 package importApp.dto;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
+@NoArgsConstructor
 @Data
 public class ActivityDto {
+    private Integer userId;
     private String title;
-    private String description;
-    private String start;
-    private String end;
+    private String contents;
+    private String startTime;
+    private String endTIme;
+    private Date date;
 
-    public ActivityDto(String title, String description, String start, String end) {
+    public ActivityDto(Integer userId, String title, String contents, String start, String end) {
+        this.userId = userId;
         this.title = title;
-        this.description = description;
-        this.start = start;
-        this.end = end;
+        this.contents = contents;
+        this.startTime = start;
+        this.endTIme = end;
+        this.date = date;
     }
 }

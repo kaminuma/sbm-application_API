@@ -38,6 +38,10 @@ dependencies {
 	implementation 'org.springframework.security:spring-security-crypto'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	implementation 'io.jsonwebtoken:jjwt:0.9.1'
+	dependencies {
+		implementation 'org.modelmapper:modelmapper:3.1.0' // 最新版を確認して使用してください
+	}
+
 }
 
 tasks.named('test') {

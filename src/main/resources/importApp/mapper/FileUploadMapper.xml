@@ -2,9 +2,9 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="importApp.mapper.FileUploadMapper">
     <insert id="insertActivity" parameterType="importApp.entity.ActivityEntity">
-        INSERT INTO activities (user_id, name, description, date, start_time, end_time, created_by, created_at, updated_by, updated_at)
+        INSERT INTO activities (user_id, name, contents, date, start_time, end_time, created_by, created_at, updated_by, updated_at)
         VALUES
-        (#{userId}, #{name}, #{description}, #{date}, #{startTime}, #{endTime}, #{createdBy}, #{createdAt}, #{updatedBy}, #{updatedAt})
+        (#{userId}, #{name}, #{contents}, #{date}, #{startTime}, #{endTime}, #{createdBy}, #{createdAt}, #{updatedBy}, #{updatedAt})
     </insert>
 </mapper>
 

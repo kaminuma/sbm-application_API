@@ -11,7 +11,7 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ActivityEntity {
+public class ActivityGetEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long activityId;
@@ -26,7 +26,7 @@ public class ActivityEntity {
     private Long updatedBy;
     private Date updatedAt;
 
-    public ActivityEntity(long userId,
+    public ActivityGetEntity(long userId,
                           Date date,
                           LocalTime start,
                           LocalTime end,
@@ -37,10 +37,11 @@ public class ActivityEntity {
         this.userId = userId;
         this.date = date;
         this.start = start;
-        this.end = end;
+        this.end= end;
         this.title = title;
         this.contents = contents;
         this.createdBy = createdBy;
         this.updatedBy = updatedBy;
     }
 }
+

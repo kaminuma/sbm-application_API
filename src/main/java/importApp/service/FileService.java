@@ -66,14 +66,14 @@ public class FileService {
                 String contents = contentsCell != null && contentsCell.getCellType() == CellType.STRING
                         ? contentsCell.getStringCellValue() : "";
 
-                LocalTime startTime = null;
-                LocalTime endTime = null;
+                LocalTime start = null;
+                LocalTime end = null;
 
                 // D列の開始時間を処理
                 if (startTimeCell != null && startTimeCell.getCellType() == CellType.NUMERIC) {
                     // Excelの日付/時間からLocalTimeを取得
                     Date startDate = startTimeCell.getDateCellValue();
-                    startTime = startDate.toInstant()
+                    start = startDate.toInstant()
                             .atZone(ZoneId.systemDefault())
                             .toLocalTime();
                 }
@@ -81,7 +81,7 @@ public class FileService {
                 // E列の終了時間を処理
                 if (endTimeCell != null && endTimeCell.getCellType() == CellType.NUMERIC) {
                     Date endDate = endTimeCell.getDateCellValue();
-                    endTime = endDate.toInstant()
+                    end = endDate.toInstant()
                             .atZone(ZoneId.systemDefault())
                             .toLocalTime();
                 }
@@ -92,8 +92,8 @@ public class FileService {
                 ActivityEntity activity = new ActivityEntity(
                         9999, // userIdのサンプル値（必要に応じて適切な値に変更）
                         date, // dateは現在の日時
-                        startTime,
-                        endTime,
+                        start,
+                        end,
                         name,
                         contents,
                         null,        // createdByはひとまずnullでDBインサート

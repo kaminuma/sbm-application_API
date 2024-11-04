@@ -2,6 +2,7 @@ package importApp.controller;
 
 import importApp.dto.ActivityDto;
 import importApp.entity.ActivityEntity;
+import importApp.entity.ActivityGetEntity;
 import importApp.model.PostRequest;
 import importApp.service.ActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,15 +33,15 @@ public class ActivityController {
 
     @GetMapping
     public List<ActivityDto> findTasksByUserId(@RequestParam("userId") Long userId) {
-        List<ActivityEntity> activities = activityService.findActivitiesByUserId(userId);
+        List<ActivityGetEntity> activities = activityService.findActivitiesByUserId(userId);
 
         List<ActivityDto> activityDtos = activities.stream()
                 .map(activity -> new ActivityDto(
                         (int) activity.getUserId(),
-                        activity.getName(),
+                        activity.getTitle(),
                         activity.getContents(),
-                        formatDateTime(activity.getDate(), activity.getStartTime()), // 'YYYY-MM-DD HH:mm'形式
-                        formatDateTime(activity.getDate(), activity.getEndTime())  // 'YYYY-MM-DD HH:mm'形式
+                        formatDateTime(activity.getDate(), activity.getStart()), // 'YYYY-MM-DD HH:mm'形式
+                        formatDateTime(activity.getDate(), activity.getEnd())  // 'YYYY-MM-DD HH:mm'形式
                 ))
                 .collect(Collectors.toList());
 

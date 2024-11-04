@@ -1,6 +1,6 @@
 package importApp.mapper;
 
-import importApp.entity.ActivityEntity;
+import importApp.entity.ActivityGetEntity;
 import importApp.entity.PostActivityEntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
@@ -15,5 +15,5 @@ public interface ActivityMapper {
     @Options(useGeneratedKeys = true, keyProperty = "taskId")
     void save(PostActivityEntity taskEntity);
 
-    List<ActivityEntity> findActivitiesByUserId(long userId);
+    List<ActivityGetEntity> findActivitiesByUserId(long userId);
 }

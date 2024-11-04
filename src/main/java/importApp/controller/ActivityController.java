@@ -37,10 +37,10 @@ public class ActivityController {
         List<ActivityDto> activityDtos = activities.stream()
                 .map(activity -> new ActivityDto(
                         (int) activity.getUserId(),
-                        activity.getName(),
+                        activity.getTitle(),
                         activity.getContents(),
-                        formatDateTime(activity.getDate(), activity.getStartTime()), // 'YYYY-MM-DD HH:mm'形式
-                        formatDateTime(activity.getDate(), activity.getEndTime())  // 'YYYY-MM-DD HH:mm'形式
+                        formatDateTime(activity.getDate(), activity.getStart()), // 'YYYY-MM-DD HH:mm'形式
+                        formatDateTime(activity.getDate(), activity.getEnd())  // 'YYYY-MM-DD HH:mm'形式
                 ))
                 .collect(Collectors.toList());
 

@@ -17,9 +17,9 @@ public class ActivityEntity {
     private Long activityId;
     private long userId;
     private Date date;
-    private LocalTime startTime;
-    private LocalTime endTime;
-    private String name;
+    private LocalTime start;
+    private LocalTime end;
+    private String title;
     private String contents;
     private Long createdBy;
     private Date createdAt;
@@ -28,17 +28,17 @@ public class ActivityEntity {
 
     public ActivityEntity(long userId,
                           Date date,
-                          LocalTime startTime,
-                          LocalTime endTime,
-                          String name,
+                          LocalTime start,
+                          LocalTime end,
+                          String title,
                           String contents,
                           Long createdBy,
                           Long updatedBy) {
         this.userId = userId;
         this.date = date;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.name = name;
+        this.start = start;
+        this.end = end;
+        this.title = title;
         this.contents = contents;
         this.createdBy = createdBy;
         this.updatedBy = updatedBy;

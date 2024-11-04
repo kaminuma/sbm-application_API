@@ -1,10 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="importApp.mapper.FileUploadMapper">
+    <resultMap id="ActivityEntityResultMap" type="importApp.entity.ActivityEntity">
+        <id property="activityId" column="activity_id" />
+        <result property="userId" column="user_id" />
+        <result property="date" column="date" />
+        <result property="start" column="start_time" />
+        <result property="end" column="end_time" />
+        <result property="title" column="name" />
+        <result property="contents" column="contents" />
+        <result property="createdBy" column="created_by" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedBy" column="updated_by" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
     <insert id="insertActivity" parameterType="importApp.entity.ActivityEntity">
         INSERT INTO activities (user_id, name, contents, date, start_time, end_time, created_by, created_at, updated_by, updated_at)
         VALUES
-        (#{userId}, #{name}, #{contents}, #{date}, #{startTime}, #{endTime}, #{createdBy}, #{createdAt}, #{updatedBy}, #{updatedAt})
+        (#{userId}, #{title}, #{contents}, #{date}, #{start}, #{end}, #{createdBy}, #{createdAt}, #{updatedBy}, #{updatedAt})
     </insert>
 </mapper>
 

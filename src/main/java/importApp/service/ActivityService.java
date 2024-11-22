@@ -35,4 +35,8 @@ public class ActivityService {
     public List<ActivityGetEntity> findActivitiesByUserId(long userId) {
         return activityMapper.findActivitiesByUserId(userId);
     }
+    public boolean deleteActivity(Long id) {
+        int result = activityMapper.markActivityAsDeleted(id);
+        return result > 0;
+    }
 }

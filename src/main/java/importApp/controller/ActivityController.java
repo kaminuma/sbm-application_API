@@ -37,6 +37,7 @@ public class ActivityController {
 
         List<ActivityDto> activityDtos = activities.stream()
                 .map(activity -> new ActivityDto(
+                        activity.getActivityId(),
                         (int) activity.getUserId(),
                         activity.getTitle(),
                         activity.getContents(),
@@ -46,6 +47,16 @@ public class ActivityController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(activityDtos).getBody();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteActivity(@PathVariable Long id) {
+        boolean isDeleted = activityService.deleteActivity(id);
+        if (isDeleted) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     // ヘルパーメソッド: 日付と時間を結合してフォーマット

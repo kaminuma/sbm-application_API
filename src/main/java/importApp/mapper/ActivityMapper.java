@@ -4,6 +4,7 @@ import importApp.entity.ActivityGetEntity;
 import importApp.entity.PostActivityEntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -16,4 +17,5 @@ public interface ActivityMapper {
     void save(PostActivityEntity taskEntity);
 
     List<ActivityGetEntity> findActivitiesByUserId(long userId);
-}
+
+    int markActivityAsDeleted(@Param("id") Long id);}

@@ -8,6 +8,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Data
 public class ActivityDto {
+    private Long activityId;
     private Integer userId;
     private String title;
     private String contents;
@@ -15,7 +16,8 @@ public class ActivityDto {
     private String end;
     private Date date;
 
-    public ActivityDto(Integer userId, String title, String contents, String start, String end) {
+    public ActivityDto(Long activityId, Integer userId, String title, String contents, String start, String end) {
+        this.activityId = activityId;
         this.userId = userId;
         this.title = title;
         this.contents = contents;

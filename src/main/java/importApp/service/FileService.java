@@ -90,6 +90,7 @@ public class FileService {
                 Date date = dateCell.getDateCellValue(); // A列から日付を取得
 
                 ActivityEntity activity = new ActivityEntity(
+                        null,
                         9999, // userIdのサンプル値（必要に応じて適切な値に変更）
                         date, // dateは現在の日時
                         start,

@@ -17,4 +17,7 @@
         SELECT * FROM users WHERE user_name = #{username}
     </select>
 
+    <update id="markUserAsDeleted">
+        UPDATE users SET is_deleted = true WHERE user_id = #{id}
+    </update>
 </mapper>

@@ -30,4 +30,9 @@ public class UserService {
         }
         return null; // 認証失敗
     }
+
+    public boolean deleteUser(Long id) {
+        int result = userMapper.markUserAsDeleted(id);
+        return result > 0;
+    }
 }

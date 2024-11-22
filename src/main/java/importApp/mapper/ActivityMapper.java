@@ -18,4 +18,8 @@ public interface ActivityMapper {
 
     List<ActivityGetEntity> findActivitiesByUserId(long userId);
 
-    int markActivityAsDeleted(@Param("id") Long id);}
+    int markActivityAsDeleted(@Param("id") Long id);
+
+    int updateActivity(PostActivityEntity activity);
+
+}

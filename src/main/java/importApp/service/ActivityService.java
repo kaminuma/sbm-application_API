@@ -5,6 +5,7 @@ import importApp.entity.ActivityGetEntity;
 import importApp.entity.PostActivityEntity;
 import importApp.mapper.ActivityMapper;
 import importApp.model.PostRequest;
+import importApp.model.PutRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,16 @@ public class ActivityService {
 
         activityMapper.save(entity);
         return "success";
+    }
+
+    public boolean updateActivity(PutRequest request) {
+        PostActivityEntity entity = modelMapper.map(request, PostActivityEntity.class);
+        entity.setUpdatedAt(null); // 必要に応じて設定
+        entity.setUpdatedBy(null);   // 必要に応じて設定
+        entity.setCreatedAt(null); // 必要に応じて設定
+        entity.setCreatedBy(null);
+        int updatedRows = activityMapper.updateActivity(entity);
+        return updatedRows > 0;
     }
 
     public List<ActivityGetEntity> findActivitiesByUserId(long userId) {

@@ -4,6 +4,7 @@ import importApp.dto.ActivityDto;
 import importApp.entity.ActivityEntity;
 import importApp.entity.ActivityGetEntity;
 import importApp.model.PostRequest;
+import importApp.model.PutRequest;
 import importApp.service.ActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,22 @@ public class ActivityController {
     public ResponseEntity<String> postActivity(@RequestBody PostRequest postRequest) {
         String createdActivity = activityService.createActivity(postRequest);
         return new ResponseEntity<>(createdActivity, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{activityId}")
+    public ResponseEntity<Void> updateActivity(
+            @PathVariable Long activityId,
+            @RequestBody PutRequest putRequest) {
+
+        // パスのactivityIdをエンティティにセット
+        putRequest.setActivityId(activityId);
+
+        boolean isUpdated = activityService.updateActivity(putRequest);
+        if (isUpdated) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping

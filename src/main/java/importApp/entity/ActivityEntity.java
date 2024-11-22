@@ -26,14 +26,17 @@ public class ActivityEntity {
     private Long updatedBy;
     private Date updatedAt;
 
-    public ActivityEntity(long userId,
-                          Date date,
-                          LocalTime start,
-                          LocalTime end,
-                          String title,
-                          String contents,
-                          Long createdBy,
-                          Long updatedBy) {
+    public ActivityEntity(
+            Long activityId,
+            long userId,
+            Date date,
+            LocalTime start,
+            LocalTime end,
+            String title,
+            String contents,
+            Long createdBy,
+            Long updatedBy) {
+        this.activityId = activityId;
         this.userId = userId;
         this.date = date;
         this.start = start;

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="importApp.mapper.ActivityMapper">
     <resultMap id="ActivityEntityResultMap" type="importApp.entity.ActivityGetEntity">
-        <id property="activityId" column="activity_id" />
+        <result property="activityId" column="activity_id" />
         <result property="userId" column="user_id" />
         <result property="date" column="date" />
         <result property="start" column="start_time" />
@@ -20,8 +20,30 @@
         VALUES (#{userId}, #{date}, #{start}, #{end}, #{title}, #{contents}, #{createdAt}, #{createdBy}, #{updatedAt}, #{updatedBy})
     </insert>
 
+    <update id="updateActivity">
+        UPDATE activities
+        SET
+        user_id = #{userId},
+        date = #{date},
+        start_time = #{start},
+        end_time = #{end},
+        name = #{title},
+        contents = #{contents},
+        updated_at = #{updatedAt},
+        updated_by = #{updatedBy}
+        WHERE activity_id = #{activityId}
+    </update>
+
     <select id="findActivitiesByUserId" parameterType="long" resultMap="ActivityEntityResultMap">
         SELECT * FROM activities
         WHERE user_id = #{userId}
+        and is_deleted = false
     </select>
+
+    <update id="markActivityAsDeleted">
+        UPDATE activities
+        SET is_deleted = true
+        WHERE activity_id = #{id}
+    </update>
+
 </mapper>

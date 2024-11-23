@@ -1,16 +1,17 @@
 package importApp.controller;
 
 import importApp.dto.ActivityDto;
-import importApp.entity.ActivityEntity;
 import importApp.entity.ActivityGetEntity;
 import importApp.model.PostRequest;
 import importApp.model.PutRequest;
+import importApp.security.JwtService;
 import importApp.service.ActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -26,8 +27,20 @@ public class ActivityController {
     @Autowired
     private ActivityService activityService;
 
+    @Autowired
+    private JwtService jwtService;
+
     @PostMapping
-    public ResponseEntity<String> postActivity(@RequestBody PostRequest postRequest) {
+    public ResponseEntity<String> postActivity(@RequestBody PostRequest postRequest,
+                                               @RequestHeader("Authorization") String token) throws AccessDeniedException {
+
+        String userIdFromToken = jwtService.extractUserId(token);
+
+        // 修正: ユーザーIDの比較に失敗した場合に403を返す
+        if (!postRequest.getUserId().toString().equals(userIdFromToken)) {
+            throw new AccessDeniedException("You are not authorized to create this activity.");
+        }
+
         String createdActivity = activityService.createActivity(postRequest);
         return new ResponseEntity<>(createdActivity, HttpStatus.CREATED);
     }
@@ -35,10 +48,18 @@ public class ActivityController {
     @PutMapping("/{activityId}")
     public ResponseEntity<Void> updateActivity(
             @PathVariable Long activityId,
-            @RequestBody PutRequest putRequest) {
+            @RequestBody PutRequest putRequest,
+            @RequestHeader("Authorization") String token) throws AccessDeniedException {
 
+        String userIdFromToken = jwtService.extractUserId(token);
         // パスのactivityIdをエンティティにセット
         putRequest.setActivityId(activityId);
+
+        // 修正: アクティビティ所有者の確認に失敗した場合に403を返す
+        boolean isOwner = activityService.isOwner(activityId, userIdFromToken);
+        if (!isOwner) {
+            throw new AccessDeniedException("You are not authorized to update this activity.");
+        }
 
         boolean isUpdated = activityService.updateActivity(putRequest);
         if (isUpdated) {
@@ -49,10 +70,19 @@ public class ActivityController {
     }
 
     @GetMapping
-    public List<ActivityDto> findTasksByUserId(@RequestParam("userId") Long userId) {
+    public List<ActivityDto> findTasksByUserId(@RequestParam("userId") Long userId,
+                                               @RequestHeader("Authorization") String token) throws AccessDeniedException {
+
+        String userIdFromToken = jwtService.extractUserId(token);
+
+        // 修正: ユーザーIDの比較に失敗した場合に403を返す
+        if (!userId.toString().equals(userIdFromToken)) {
+            throw new AccessDeniedException("You are not authorized to access this resource.");
+        }
+
         List<ActivityGetEntity> activities = activityService.findActivitiesByUserId(userId);
 
-        List<ActivityDto> activityDtos = activities.stream()
+        return activities.stream()
                 .map(activity -> new ActivityDto(
                         activity.getActivityId(),
                         (int) activity.getUserId(),
@@ -62,12 +92,19 @@ public class ActivityController {
                         formatDateTime(activity.getDate(), activity.getEnd())  // 'YYYY-MM-DD HH:mm'形式
                 ))
                 .collect(Collectors.toList());
-
-        return ResponseEntity.ok(activityDtos).getBody();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteActivity(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteActivity(@PathVariable Long id,
+                                               @RequestHeader("Authorization") String token) throws AccessDeniedException {
+        String userIdFromToken = jwtService.extractUserId(token);
+
+        // 修正: アクティビティ所有者の確認に失敗した場合に403を返す
+        boolean isOwner = activityService.isOwner(id, userIdFromToken);
+        if (!isOwner) {
+            throw new AccessDeniedException("You are not authorized to delete this activity.");
+        }
+
         boolean isDeleted = activityService.deleteActivity(id);
         if (isDeleted) {
             return ResponseEntity.noContent().build();

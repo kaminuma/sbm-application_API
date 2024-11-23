@@ -50,4 +50,14 @@ public class ActivityService {
         int result = activityMapper.markActivityAsDeleted(id);
         return result > 0;
     }
+
+    // アクティビティの所有者確認
+    public boolean isOwner(Long activityId, String userId) {
+        // ユーザーのすべてのアクティビティを取得
+        List<ActivityGetEntity> userActivities = activityMapper.findActivitiesByUserId(Long.parseLong(userId));
+
+        // ユーザーのアクティビティリストに該当するactivityIdが存在するかを確認
+        return userActivities.stream()
+                .anyMatch(activity -> activity.getActivityId().equals(activityId));
+    }
 }

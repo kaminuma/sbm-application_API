@@ -1,7 +1,9 @@
 package importApp.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -41,9 +43,17 @@ public class JwtService {
     }
 
     private Claims getClaims(String token) {
-        return Jwts.parser()
-                .setSigningKey(secretKey)
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            return Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(token.replace("Bearer ", ""))
+                    .getBody();
+        } catch (MalformedJwtException e) {
+            throw new IllegalArgumentException("Invalid JWT token format", e);
+        } catch (ExpiredJwtException e) {
+            throw new IllegalArgumentException("JWT token has expired", e);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Failed to parse JWT token", e);
+        }
     }
 }

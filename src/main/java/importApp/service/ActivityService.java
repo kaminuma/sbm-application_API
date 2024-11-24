@@ -10,6 +10,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -24,10 +27,12 @@ public class ActivityService {
 
     public String createActivity(PostRequest request) {
         PostActivityEntity entity = modelMapper.map(request, PostActivityEntity.class);
-        entity.setUpdatedAt(null); // 必要に応じて設定
-        entity.setUpdatedBy(null);   // 必要に応じて設定
-        entity.setCreatedAt(null); // 必要に応じて設定
-        entity.setCreatedBy(null);
+        // 作成者と作成日時を設定
+        entity.setCreatedAt(convertToDate(LocalDateTime.now()));
+        entity.setCreatedBy(Long.valueOf(request.getUserId()));
+        // 更新日時と更新者は作成時は未設定
+        entity.setUpdatedAt(null);
+        entity.setUpdatedBy(null);
 
         activityMapper.save(entity);
         return "success";
@@ -35,9 +40,11 @@ public class ActivityService {
 
     public boolean updateActivity(PutRequest request) {
         PostActivityEntity entity = modelMapper.map(request, PostActivityEntity.class);
-        entity.setUpdatedAt(null); // 必要に応じて設定
-        entity.setUpdatedBy(null);   // 必要に応じて設定
-        entity.setCreatedAt(null); // 必要に応じて設定
+        //　更新者と更新日時を設定
+        entity.setUpdatedAt(convertToDate(LocalDateTime.now()));
+        entity.setUpdatedBy(Long.valueOf(request.getUserId()));
+        // 作成日時と作成者は変更しない
+        entity.setCreatedAt(null);
         entity.setCreatedBy(null);
         int updatedRows = activityMapper.updateActivity(entity);
         return updatedRows > 0;
@@ -59,5 +66,10 @@ public class ActivityService {
         // ユーザーのアクティビティリストに該当するactivityIdが存在するかを確認
         return userActivities.stream()
                 .anyMatch(activity -> activity.getActivityId().equals(activityId));
+    }
+
+    // Date型にLocalDateTimeを変換するメソッドの作成
+    private Date convertToDate(LocalDateTime localDateTime) {
+        return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
     }
 }

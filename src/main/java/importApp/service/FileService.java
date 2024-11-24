@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -22,7 +23,6 @@ public class FileService {
     // ファイルのフォーマットを確認
     public boolean isValidFormat(MultipartFile file) {
         try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
-            // フォーマットが正しいかの確認ロジックを追加
             return true; // フォーマットが正しい場合
         } catch (Exception e) {
             return false; // フォーマットが正しくない場合
@@ -30,7 +30,7 @@ public class FileService {
     }
 
     // ファイルデータの処理
-    public String parseExcelFile(MultipartFile file) {
+    public String parseExcelFile(MultipartFile file, String userId) {
         try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0); // 1列目のシートを選択
 
@@ -47,14 +47,12 @@ public class FileService {
                 // 必須列のセルを取得
                 Cell dateCell = row.getCell(0); // A列: 日付
                 if (dateCell == null) {
-                    // A列が空白または日付でない場合、ループを終了
-                    break;
+                    break; // A列が空白または日付でない場合
                 }
 
                 Cell nameCell = row.getCell(1); // B列: アクティビティ名
                 if (nameCell == null || nameCell.getCellType() != CellType.STRING || nameCell.getStringCellValue().isEmpty()) {
-                    // B列が空白の場合、ループを終了
-                    break;
+                    break; // B列が空白の場合
                 }
 
                 Cell contentsCell = row.getCell(2); // C列: 説明
@@ -71,7 +69,6 @@ public class FileService {
 
                 // D列の開始時間を処理
                 if (startTimeCell != null && startTimeCell.getCellType() == CellType.NUMERIC) {
-                    // Excelの日付/時間からLocalTimeを取得
                     Date startDate = startTimeCell.getDateCellValue();
                     start = startDate.toInstant()
                             .atZone(ZoneId.systemDefault())
@@ -87,18 +84,20 @@ public class FileService {
                 }
 
                 // 日付を取得して、ActivityEntityを作成
-                Date date = dateCell.getDateCellValue(); // A列から日付を取得
+                Date date = dateCell.getDateCellValue();
 
                 ActivityEntity activity = new ActivityEntity(
-                        null,
-                        9999, // userIdのサンプル値（必要に応じて適切な値に変更）
-                        date, // dateは現在の日時
-                        start,
-                        end,
-                        name,
-                        contents,
-                        null,        // createdByはひとまずnullでDBインサート
-                        null         // updatedByもひとまずnullでDBインサート
+                        null,              // ID（DBで自動生成される場合はnull）
+                        Integer.parseInt(userId), // トークンから取得したuserId
+                        date,              // A列から取得した日付
+                        start,             // 開始時間
+                        end,               // 終了時間
+                        name,              // B列のアクティビティ名
+                        contents,          // C列の説明
+                        (long) Integer.parseInt(userId),
+                        convertToDate(LocalDateTime.now()), // 現在日時
+                        null, // updatedByは未設定
+                        null  // updatedAtは未設定
                 );
 
                 // データを挿入
@@ -109,5 +108,9 @@ public class FileService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+    // LocalDateTime を Date に変換するメソッドを作成
+    private Date convertToDate(LocalDateTime localDateTime) {
+        return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
     }
 }

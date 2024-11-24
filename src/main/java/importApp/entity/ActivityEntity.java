@@ -1,6 +1,5 @@
 package importApp.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,7 +9,6 @@ import java.util.Date;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class ActivityEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,7 +33,9 @@ public class ActivityEntity {
             String title,
             String contents,
             Long createdBy,
-            Long updatedBy) {
+            Date createdAt,
+            Long updatedBy,
+            Date updatedAt) {
         this.activityId = activityId;
         this.userId = userId;
         this.date = date;
@@ -44,6 +44,8 @@ public class ActivityEntity {
         this.title = title;
         this.contents = contents;
         this.createdBy = createdBy;
+        this.createdAt = createdAt;
         this.updatedBy = updatedBy;
+        this.updatedAt = updatedAt;
     }
 }

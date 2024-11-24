@@ -1,12 +1,11 @@
 package importApp.controller;
 
-
 import importApp.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -16,7 +15,24 @@ public class FileUploadController  {
     private FileService fileService;
 
     @PostMapping("/upload")
-    public String handleFileUpload(@RequestParam("file") MultipartFile file) {
-        return fileService.parseExcelFile(file);
+    public ResponseEntity<?> handleFileUpload(
+            @RequestParam("file") MultipartFile file,
+            Authentication authentication) {
+
+        // トークンから userId を取得
+        String userId = authentication.getName(); // Spring Security を利用
+
+        if (file == null || file.isEmpty()) {
+            return ResponseEntity.badRequest().body("ファイルが空です。");
+        }
+
+        try {
+            // ファイル処理をサービスに委譲
+            String result = fileService.parseExcelFile(file, userId);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            // 例外処理
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("ファイルの処理中にエラーが発生しました: " + e.getMessage());
+        }
     }
 }

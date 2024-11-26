@@ -37,7 +37,7 @@ jobs:
 
       # 4. Gradleでビルド
       - name: Build with Gradle
-        run: ./gradlew build -Dspring.profiles.active=prod
+        run: ./gradlew assemble -Dspring.profiles.active=prod
 
       # 5. 成果物を転送（rsync）
       - name: Deploy to EC2 with rsync

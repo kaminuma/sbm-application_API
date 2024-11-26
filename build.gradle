@@ -58,5 +58,8 @@ flyway {
 }
 
 jar {
+	archiveBaseName.set("sbm-app")
+	archiveVersion.set("")
+	archiveClassifier.set("")
 	enabled = false
 }

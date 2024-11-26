@@ -59,4 +59,4 @@ jobs:
           key: ${{ secrets.SECRET_KEY }}
           script: |
             pkill -f 'java -jar' || true
-            nohup java -jar /srv/api/your-app-name.jar --spring.profiles.active=prod > /srv/api/app.log 2>&1 &
+            nohup java -jar /srv/api/sbm-app.jar --spring.profiles.active=prod > /srv/api/app.log 2>&1 &

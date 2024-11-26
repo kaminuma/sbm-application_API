@@ -50,15 +50,17 @@ jobs:
             sudo chmod -R 777 /srv/sbm/api
 
       # 5. 成果物を転送（rsync）
-      - name: Deploy with Rsync
-        uses: burnett01/rsync-deployments@5.1
+      - name: Deploy with rsync
+        uses: appleboy/ssh-action@v0.1.5
         with:
-          switches: '-avz --delete --rsync-path="sudo rsync"'
-          path: build/libs/*.jar
-          remote_path: /srv/sbm/api/
-          remote_host: ${{ secrets.HOST }}
-          remote_user: ${{ secrets.USER }}
-          remote_key: ${{ secrets.SECRET_KEY }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SECRET_KEY }}
+          script: |
+            sudo chmod -R 777 /srv/sbm/api || true # 一時的な書き込み権限の付与
+            rsync -avz --delete ./build/libs/*.jar /srv/sbm/api/
+            sudo chown -R ${{ secrets.USER }}:${{ secrets.USER }} /srv/sbm/api # 所有権を動的に変更
+            sudo chmod -R 755 /srv/sbm/api 
 
       # 6. EC2でアプリケーションを再起動
       - name: Restart application on EC2

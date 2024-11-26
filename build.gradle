@@ -58,8 +58,11 @@ flyway {
 }
 
 jar {
-	archiveBaseName.set("sbm-app")
-	archiveVersion.set("")
-	archiveClassifier.set("")
 	enabled = false
+}
+
+bootJar {
+	archiveBaseName.set("sbm-app")  // ベース名を設定
+	archiveVersion.set("")          // バージョンを除外
+	archiveClassifier.set("")       // 分類子を除外
 }

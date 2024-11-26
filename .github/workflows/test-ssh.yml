@@ -6,6 +6,7 @@ on:
 jobs:
   test-ssh:
     runs-on: ubuntu-latest
+    environment: prod # 本番環境指定
 
     steps:
     # 1. SSH接続確認

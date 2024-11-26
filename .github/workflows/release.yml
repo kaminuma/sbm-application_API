@@ -24,12 +24,12 @@ jobs:
       # 3. `application-dummy.yml`を置換
       - name: Replace placeholders in application-dummy.yml
         run: |
-          sed -i "s/db_dummy_host/${{ secrets.DB_HOST }}/g" src/main/resources/application-dummy.yml
-          sed -i "s/db_dummy_port/${{ secrets.DB_PORT }}/g" src/main/resources/application-dummy.yml
-          sed -i "s/db_dummy_name/${{ secrets.DB_NAME }}/g" src/main/resources/application-dummy.yml
-          sed -i "s/db_dummy_username/${{ secrets.DB_USERNAME }}/g" src/main/resources/application-dummy.yml
-          sed -i "s/db_dummy_password/${{ secrets.DB_PASSWORD }}/g" src/main/resources/application-dummy.yml
-          sed -i "s/dummy_jwt_secret/${{ secrets.JWT_SECRET }}/g" src/main/resources/application-dummy.yml
+          sed -i "s/db_dummy_host/${{ secrets.DB_HOST }}/g" src/main/resources/application-prod.yml
+          sed -i "s/db_dummy_port/${{ secrets.DB_PORT }}/g" src/main/resources/application-prod.yml
+          sed -i "s/db_dummy_name/${{ secrets.DB_NAME }}/g" src/main/resources/application-prod.yml
+          sed -i "s/db_dummy_username/${{ secrets.DB_USERNAME }}/g" src/main/resources/application-prod.yml
+          sed -i "s/db_dummy_password/${{ secrets.DB_PASSWORD }}/g" src/main/resources/application-prod.yml
+          sed -i "s/dummy_jwt_secret/${{ secrets.JWT_SECRET }}/g" src/main/resources/application-prod.yml
 
       # 4. Gradleでビルド
       - name: Build with Gradle

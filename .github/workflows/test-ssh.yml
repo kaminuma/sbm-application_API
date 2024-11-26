@@ -23,4 +23,4 @@ jobs:
     # 3. EC2への接続テスト
     - name: Test SSH Connection
       run: |
-        ssh ${{ secrets.USER }}@${{ secrets.HOST }} "echo 'SSH connection successful!'"
+        ssh -i ~/.ssh/id_rsa ${{ secrets.USER }}@${{ secrets.HOST }} "echo 'SSH connection successful!'"

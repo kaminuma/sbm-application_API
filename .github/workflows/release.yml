@@ -21,6 +21,10 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
+      #権限付与
+      - name: permission for gradlew
+        run: chmod +x ./gradlew
+
       # 3. `application-dummy.yml`を置換
       - name: Replace placeholders in application-dummy.yml
         run: |

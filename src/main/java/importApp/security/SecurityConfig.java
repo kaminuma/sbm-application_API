@@ -56,6 +56,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         public void addCorsMappings(CorsRegistry registry) {
             registry.addMapping("/**") // すべてのエンドポイントに適用
                     .allowedOrigins("http://localhost:5173") // VueアプリケーションのURLを指定
+                    .allowedOrigins("http://13.211.29.238") //テスト
                     .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                     .allowedHeaders("*")
                     .allowCredentials(true);

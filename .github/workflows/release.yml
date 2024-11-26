@@ -70,11 +70,7 @@ jobs:
           username: ${{secrets.USER}}
           key: ${{ secrets.SECRET_KEY }}
           script: |
-            if pgrep -f 'java -jar'; then
-              pkill -f 'java -jar'
-            fi
-            sleep 5
-            nohup java -jar /srv/api/sbm-app.jar --spring.profiles.active=prod > /srv/api/app.log 2>&1 < /dev/null &
+            sudo systemctl restart sbm-app
       - name: Reset permissions
         uses: appleboy/ssh-action@v0.1.5
         with:

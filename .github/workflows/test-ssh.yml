@@ -1,0 +1,26 @@
+name: Test SSH Connection to EC2
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-ssh:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. 秘密鍵を設定
+    - name: Set up SSH Key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SECRET_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+
+    # 2. ホストキーの確認をスキップ
+    - name: Disable Host Key Checking
+      run: |
+        echo -e "Host *\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+
+    # 3. EC2への接続テスト
+    - name: Test SSH Connection
+      run: |
+        ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "echo 'SSH connection successful!'"

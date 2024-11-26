@@ -55,7 +55,7 @@ jobs:
         uses: appleboy/ssh-action@v0.1.5
         with:
           host: ${{ secrets.HOST }}
-          username: ${{secret.USER}}
+          username: ${{secrets.USER}}
           key: ${{ secrets.SECRET_KEY }}
           script: |
             pkill -f 'java -jar' || true

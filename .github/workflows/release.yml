@@ -43,7 +43,7 @@ jobs:
       - name: Deploy with Rsync
         uses: burnett01/rsync-deployments@5.1
         with:
-          switches: '-avz --delete --no-time --no-perms --rsync-path="sudo rsync"'
+          switches: '-avz --delete --rsync-path="sudo rsync"'
           path: ./build/libs/*.jar
           remote_path: /srv/api/
           remote_host: ${{ secrets.HOST }}

@@ -1,0 +1,20 @@
+name: Test SSH Connection to EC2
+
+on:
+  workflow_dispatch: # 手動実行を許可
+
+jobs:
+  test-ssh:
+    runs-on: ubuntu-latest
+    environment: prod # 本番環境指定
+
+    steps:
+    # 1. SSH接続確認
+    - name: Test SSH Connection with appleboy
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USER }}
+        key: ${{ secrets.SECRET_KEY }}
+        script: |
+          echo "SSH connection successful!"

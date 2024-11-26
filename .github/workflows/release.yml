@@ -1,0 +1,54 @@
+name: Build and Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. リポジトリをチェックアウト
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. JavaとGradleのセットアップ
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      # 3. `application-dummy.yml`を置換
+      - name: Replace placeholders in application-dummy.yml
+        run: |
+          sed -i "s/db_dummy_host/${{ secrets.DB_HOST }}/g" src/main/resources/application-dummy.yml
+          sed -i "s/db_dummy_port/${{ secrets.DB_PORT }}/g" src/main/resources/application-dummy.yml
+          sed -i "s/db_dummy_name/${{ secrets.DB_NAME }}/g" src/main/resources/application-dummy.yml
+          sed -i "s/db_dummy_username/${{ secrets.DB_USERNAME }}/g" src/main/resources/application-dummy.yml
+          sed -i "s/db_dummy_password/${{ secrets.DB_PASSWORD }}/g" src/main/resources/application-dummy.yml
+          sed -i "s/dummy_jwt_secret/${{ secrets.JWT_SECRET }}/g" src/main/resources/application-dummy.yml
+
+      # 4. Gradleでビルド
+      - name: Build with Gradle
+        run: ./gradlew build -Dspring.profiles.active=prod
+
+      # 5. 成果物を転送（rsync）
+      - name: Deploy to EC2 with rsync
+        run: |
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
+            ./build/libs/your-app-name-0.0.1-SNAPSHOT.jar \
+            ec2-user@${{ secrets.HOST }}:/srv/api/your-app-name.jar
+
+      # 6. EC2でアプリケーションを再起動
+      - name: Restart application on EC2
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.HOST }}
+          username: ec2-user
+          key: ${{ secrets.SECRET_KEY }}
+          script: |
+            pkill -f 'java -jar' || true
+            nohup java -jar /srv/api/your-app-name.jar --spring.profiles.active=prod > /srv/api/app.log 2>&1 &

@@ -1,3 +1,5 @@
 spring:
   profiles:
-    active: prod # デフォルトで本番プロファイルをアクティブにする
+    active: local
+
+  baseline-on-migrate: true

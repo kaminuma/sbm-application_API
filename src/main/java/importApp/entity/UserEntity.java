@@ -16,7 +16,7 @@ public class UserEntity {
 
     @NotBlank
     @Size(min = 3, max = 50)
-    private String username;
+    private String user_name;
 
     @NotBlank
     @Email

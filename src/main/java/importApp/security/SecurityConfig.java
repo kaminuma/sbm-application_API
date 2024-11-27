@@ -1,11 +1,9 @@
 package importApp.security;
 
 import importApp.filter.JwtAuthenticationFilter;
-import importApp.security.JwtService; // JwtServiceインポートの追加
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -55,7 +53,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         @Override
         public void addCorsMappings(CorsRegistry registry) {
             registry.addMapping("/**") // すべてのエンドポイントに適用
-                    .allowedOrigins("http://localhost:5173","http://13.211.29.238" ) 
+                    .allowedOrigins("http://localhost:5173","http://13.211.29.238")
                     .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                     .allowedHeaders("*")
                     .allowCredentials(true);

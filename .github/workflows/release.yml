@@ -38,7 +38,7 @@ jobs:
 
       # 4. Gradleでビルド
       - name: Build with Gradle
-        run: ./gradlew assemble -Dspring.profiles.active=prod
+        run: ./gradlew clean Assemble -Dspring.profiles.active=prod --info
 
       - name: Grant temporary write permissions
         uses: appleboy/ssh-action@v0.1.5

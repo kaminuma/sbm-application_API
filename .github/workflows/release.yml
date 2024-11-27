@@ -49,6 +49,10 @@ jobs:
           script: | 
             sudo chmod -R 777 /srv/sbm/api
 
+      # Debugging Step (Optional)
+      - name: Debug replaced file
+        run: cat src/main/resources/application-prod.yml
+
       # 5. 成果物を転送（rsync）
       - name: Deploy with Rsync
         uses: burnett01/rsync-deployments@5.1

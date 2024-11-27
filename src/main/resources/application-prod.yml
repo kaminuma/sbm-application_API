@@ -22,6 +22,9 @@ spring:
     mapper-locations: classpath:importApp/mapper/*.xml
     configuration:
       map-underscore-to-camel-case: true
+  spring:
+    flyway:
+      enabled: false
 
 jwt:
   secret: dummy_jwt_secret

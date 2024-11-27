@@ -10,8 +10,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
-    hibernate:
-      ddl-auto: validate
+#        ddl-auto: validate エンティティとデータベーススキーマが一致しているか検証
   servlet:
     multipart:
       enabled: true

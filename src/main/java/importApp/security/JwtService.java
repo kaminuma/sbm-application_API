@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
-@PropertySource(value = {"classpath:application.yml"})
+@PropertySource(value = {"classpath:application-local.yml"})
 @Service
 public class JwtService {
 

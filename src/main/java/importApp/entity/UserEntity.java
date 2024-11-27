@@ -7,6 +7,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 @Data
+@Entity
 @Table(name = "users")
 public class UserEntity {
     @Id
@@ -14,7 +15,6 @@ public class UserEntity {
     private Long user_id;
 
     @NotBlank
-    @Column(name = "user_name")
     @Size(min = 3, max = 50)
     private String username;
 

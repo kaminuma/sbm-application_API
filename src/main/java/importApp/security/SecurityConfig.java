@@ -33,7 +33,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // ステートレスに設定
                 .and()
                 .authorizeRequests()
-                .antMatchers("/auth/register", "/auth/login").permitAll() // 登録とログインは全てのユーザーに許可
+                .antMatchers("/api/v1/auth/register", "/api/v1/auth/login").permitAll() // 登録とログインは全てのユーザーに許可
                 .anyRequest().authenticated() // それ以外は認証が必要
                 .and()
                 .formLogin().disable() // フォームログインを無効化

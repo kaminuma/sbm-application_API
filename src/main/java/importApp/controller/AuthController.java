@@ -11,21 +11,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth")
-public class AuthController {
+public class AuthController extends BaseController {
 
     @Autowired
     private UserService userService;
 
     @Autowired JwtService jwtService;
 
-    @PostMapping("/register")
+    @PostMapping("/auth/register")
     public ResponseEntity<?> register(@RequestBody UserEntity user) {
         userService.registerUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
     }
 
-    @PostMapping("/login")
+    @PostMapping("/auth/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         // ユーザー名とパスワードでユーザーを認証
         UserEntity user = userService.loginUser(loginRequest.getUsername(), loginRequest.getPassword());
@@ -45,7 +44,7 @@ public class AuthController {
         }
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/auth/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         boolean isDeleted = userService.deleteUser(id);
         if (isDeleted) {

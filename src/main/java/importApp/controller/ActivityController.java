@@ -21,8 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/activities")
-public class ActivityController {
+public class ActivityController extends BaseController {
 
     @Autowired
     private ActivityService activityService;
@@ -30,7 +29,7 @@ public class ActivityController {
     @Autowired
     private JwtService jwtService;
 
-    @PostMapping
+    @PostMapping("/activities")
     public ResponseEntity<String> postActivity(@RequestBody PostRequest postRequest,
                                                @RequestHeader("Authorization") String token) throws AccessDeniedException {
 
@@ -45,7 +44,7 @@ public class ActivityController {
         return new ResponseEntity<>(createdActivity, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{activityId}")
+    @PutMapping("/activities/{activityId}")
     public ResponseEntity<Void> updateActivity(
             @PathVariable Long activityId,
             @RequestBody PutRequest putRequest,
@@ -69,7 +68,7 @@ public class ActivityController {
         }
     }
 
-    @GetMapping
+    @GetMapping("/activities")
     public List<ActivityDto> findTasksByUserId(@RequestParam("userId") Long userId,
                                                @RequestHeader("Authorization") String token) throws AccessDeniedException {
 
@@ -94,7 +93,7 @@ public class ActivityController {
                 .collect(Collectors.toList());
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/activities/{id}")
     public ResponseEntity<Void> deleteActivity(@PathVariable Long id,
                                                @RequestHeader("Authorization") String token) throws AccessDeniedException {
         String userIdFromToken = jwtService.extractUserId(token);

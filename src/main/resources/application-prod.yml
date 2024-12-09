@@ -29,3 +29,7 @@ spring:
 
 jwt:
   secret: dummy_jwt_secret
+
+analyzer:
+  api:
+    base-url: "http://localhost:5000/api/v1"

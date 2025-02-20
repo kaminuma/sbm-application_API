@@ -1,14 +1,28 @@
 # sbm-application-API
-**【Description】**
-Self-Balanced Memory application API
 
-This application provides a "Self-Balanced Memory" aimed at reflecting on and recording daily life. Users can manage their schedules in bulk and also import records created in Excel or spreadsheets. With this feature, users can update or delete their entries on the web based on the imported information, allowing for more efficient management of daily life. This repository is for the API that supports this functionality.
+## 📌 Overview
 
-This repository is for that API
+`sbm-application-API` は、**Self-Balanced Memory (SBM) アプリケーション** のバックエンド API です。<br>
+ユーザーの生活記録を管理し、データ分析をサポートするために設計されています。
 
+SBM は、日々の活動を記録・振り返ることで、より良い生活習慣を構築することを目的としたプラットフォームです。<br>
+API は、データの記録・分析・可視化をサポートし、フロントエンド（Vue.js）と連携して動作します。
 
+---
 
-**【日本語の説明】**
-Self-Balanced Memory アプリケーション API
+## 🛠️ Setup & Installation
 
-このアプリケーションは、日々の生活を振り返り記録することを目的とした「セルフバランスドメモリー」を提供します。ユーザーはスケジュールを一括管理できるだけでなく、Excelやスプレッドシートで作成した記録をインポートすることもできます。この機能を利用することで、インポートした情報に基づいてウェブ上のエントリーを更新または削除することができ、日々の生活をより効率的に管理できるようになります。このリポジトリは、その機能をサポートするAPIのためのものです。
+### **1️⃣ リポジトリをクローン**
+```sh
+git clone https://github.com/kaminuma/sbm-application_API.git
+cd sbm-application-API
+```
+
+### **2️⃣ Docker で起動**
+```sh
+docker-compose up -d
+```
+API が起動し、http://localhost:8080 でアクセス可能になります。
+
+## 📜 License
+This project is licensed under the **Apache License 2.0**.

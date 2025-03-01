@@ -35,7 +35,7 @@ public class ActivityController extends BaseController {
 
         String userIdFromToken = jwtService.extractUserId(token);
 
-        // 修正: ユーザーIDの比較に失敗した場合に403を返す
+        // ユーザーIDの比較に失敗した場合に403を返す
         if (!postRequest.getUserId().toString().equals(userIdFromToken)) {
             throw new AccessDeniedException("You are not authorized to create this activity.");
         }
@@ -54,7 +54,7 @@ public class ActivityController extends BaseController {
         // パスのactivityIdをエンティティにセット
         putRequest.setActivityId(activityId);
 
-        // 修正: アクティビティ所有者の確認に失敗した場合に403を返す
+        // アクティビティ所有者の確認に失敗した場合に403を返す
         boolean isOwner = activityService.isOwner(activityId, userIdFromToken);
         if (!isOwner) {
             throw new AccessDeniedException("You are not authorized to update this activity.");
@@ -74,7 +74,7 @@ public class ActivityController extends BaseController {
 
         String userIdFromToken = jwtService.extractUserId(token);
 
-        // 修正: ユーザーIDの比較に失敗した場合に403を返す
+        //  ユーザーIDの比較に失敗した場合に403を返す
         if (!userId.toString().equals(userIdFromToken)) {
             throw new AccessDeniedException("You are not authorized to access this resource.");
         }
@@ -98,7 +98,7 @@ public class ActivityController extends BaseController {
                                                @RequestHeader("Authorization") String token) throws AccessDeniedException {
         String userIdFromToken = jwtService.extractUserId(token);
 
-        // 修正: アクティビティ所有者の確認に失敗した場合に403を返す
+        // アクティビティ所有者の確認に失敗した場合に403を返す
         boolean isOwner = activityService.isOwner(id, userIdFromToken);
         if (!isOwner) {
             throw new AccessDeniedException("You are not authorized to delete this activity.");

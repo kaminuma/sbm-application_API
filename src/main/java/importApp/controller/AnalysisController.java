@@ -1,14 +1,16 @@
 package importApp.controller;
 
 import importApp.client.AnalyzerApiClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController
-public class AnalysisController extends BaseController{
+public class AnalysisController extends BaseController {
+
+    private static final Logger log = LoggerFactory.getLogger(AnalysisController.class);
 
     private final AnalyzerApiClient analyzerApiClient;
 
@@ -31,16 +33,12 @@ public class AnalysisController extends BaseController{
             @RequestParam String endDate,
             @RequestParam String userId
     ) {
-        try {
-            // Analyzer API にリクエストを送信
-            var result = analyzerApiClient.analyzeCategory(startDate, endDate, userId);
+        log.info("GET /analyze requested with startDate={}, endDate={}, userId={}", startDate, endDate, userId);
 
-            // 成功した場合、結果を返す
-            return ResponseEntity.ok(result);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
-        }
+        // Analyzer API にリクエストを送信
+        var result = analyzerApiClient.analyzeCategory(startDate, endDate, userId);
+
+        log.info("Analysis result successfully retrieved for userId={}", userId);
+        return ResponseEntity.ok(result);
     }
 }

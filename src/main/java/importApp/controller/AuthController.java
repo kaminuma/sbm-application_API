@@ -5,6 +5,8 @@ import importApp.model.LoginRequest;
 import importApp.model.LoginResponse;
 import importApp.security.JwtService;
 import importApp.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,45 +15,67 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class AuthController extends BaseController {
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+
     @Autowired
     private UserService userService;
 
-    @Autowired JwtService jwtService;
+    @Autowired
+    private JwtService jwtService;
 
     @PostMapping("/auth/register")
     public ResponseEntity<?> register(@RequestBody UserEntity user) {
-        userService.registerUser(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
+        logger.info("Register request received");
+
+        try {
+            userService.registerUser(user);
+            logger.info("User registered successfully");
+            return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
+        } catch (Exception e) {
+            logger.error("User registration failed", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("User registration failed");
+        }
     }
 
     @PostMapping("/auth/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        // ユーザー名とパスワードでユーザーを認証
-        UserEntity user = userService.loginUser(loginRequest.getUsername(), loginRequest.getPassword());
+        logger.info("Login request received");
 
-        // 認証に成功した場合
-        if (user != null) {
-            // JWTトークンを生成
-            String userId = String.valueOf(user.getUser_id());
-            String token = jwtService.generateToken(userId);
+        try {
+            UserEntity user = userService.loginUser(loginRequest.getUsername(), loginRequest.getPassword());
 
-            // LoginResponseを作成し、トークンとユーザーIDを返す
-            return ResponseEntity.ok(new LoginResponse(token, userId));
-        } else {
-            // 認証に失敗した場合
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new LoginResponse(null, null)); // エラーメッセージは含めず
+            if (user != null) {
+                String userId = String.valueOf(user.getUser_id());
+                String token = jwtService.generateToken(userId);
+                logger.info("Login successful for user ID: {}", userId);
+                return ResponseEntity.ok(new LoginResponse(token, userId));
+            } else {
+                logger.warn("Login failed: Invalid username or password");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new LoginResponse(null, null));
+            }
+        } catch (Exception e) {
+            logger.error("Login error", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Login failed due to server error");
         }
     }
 
     @DeleteMapping("/auth/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        boolean isDeleted = userService.deleteUser(id);
-        if (isDeleted) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
+        logger.info("Delete user request received for ID: {}", id);
+
+        try {
+            boolean isDeleted = userService.deleteUser(id);
+            if (isDeleted) {
+                logger.info("User deleted successfully: ID={}", id);
+                return ResponseEntity.noContent().build();
+            } else {
+                logger.warn("User not found for deletion: ID={}", id);
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            logger.error("Error deleting user ID {}", id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }
-

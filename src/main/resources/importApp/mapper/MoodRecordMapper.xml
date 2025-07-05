@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="importApp.mapper.MoodRecordMapper">
+    <resultMap id="MoodRecordEntityResultMap" type="importApp.entity.MoodRecordEntity">
+        <result property="id" column="id" />
+        <result property="userId" column="user_id" />
+        <result property="date" column="date" />
+        <result property="mood" column="mood" />
+        <result property="note" column="note" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+        <result property="isDeleted" column="is_deleted" />
+    </resultMap>
+
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO mood_records (user_id, date, mood, note, created_at, updated_at)
+        VALUES (#{userId}, #{date}, #{mood}, #{note}, #{createdAt}, #{updatedAt})
+    </insert>
+
+    <select id="findMoodRecordsByUserId" parameterType="long" resultMap="MoodRecordEntityResultMap">
+        SELECT * FROM mood_records
+        WHERE user_id = #{userId}
+        AND is_deleted = false
+        ORDER BY date DESC
+    </select>
+
+    <select id="findMoodRecordByUserIdAndDate" resultMap="MoodRecordEntityResultMap">
+        SELECT * FROM mood_records
+        WHERE user_id = #{userId}
+        AND date = #{date}
+        AND is_deleted = false
+    </select>
+
+    <update id="updateMoodRecord">
+        UPDATE mood_records
+        SET
+        mood = #{mood},
+        note = #{note},
+        updated_at = #{updatedAt}
+        WHERE id = #{id}
+        AND is_deleted = false
+    </update>
+
+    <update id="markMoodRecordAsDeleted">
+        UPDATE mood_records
+        SET is_deleted = true
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteMoodRecordByUserIdAndDate">
+        DELETE FROM mood_records
+        WHERE user_id = #{userId}
+        AND date = #{date}
+    </delete>
+</mapper> 

@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'importApp'
-version = '0.0.3-SNAPSHOT'
+version = '0.1.0'
 
 java {
 	sourceCompatibility = '11'

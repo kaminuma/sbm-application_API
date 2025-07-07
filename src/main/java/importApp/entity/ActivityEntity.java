@@ -19,6 +19,8 @@ public class ActivityEntity {
     private LocalTime end;
     private String title;
     private String contents;
+    private String category;
+    private String categorySub;
     private Long createdBy;
     private Date createdAt;
     private Long updatedBy;
@@ -32,6 +34,8 @@ public class ActivityEntity {
             LocalTime end,
             String title,
             String contents,
+            String category,
+            String categorySub,
             Long createdBy,
             Date createdAt,
             Long updatedBy,
@@ -43,6 +47,8 @@ public class ActivityEntity {
         this.end = end;
         this.title = title;
         this.contents = contents;
+        this.category = category;
+        this.categorySub = categorySub;
         this.createdBy = createdBy;
         this.createdAt = createdAt;
         this.updatedBy = updatedBy;

@@ -15,14 +15,17 @@ public class ActivityDto {
     private String start;
     private String end;
     private Date date;
+    private String category;
+    private String categorySub;
 
-    public ActivityDto(Long activityId, Integer userId, String title, String contents, String start, String end) {
+    public ActivityDto(Long activityId, Integer userId, String title, String contents, String start, String end, String category, String categorySub) {
         this.activityId = activityId;
         this.userId = userId;
         this.title = title;
         this.contents = contents;
         this.start = start;
         this.end = end;
-        this.date = date;
+        this.category = category;
+        this.categorySub = categorySub;
     }
 }

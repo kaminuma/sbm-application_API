@@ -34,7 +34,7 @@ public class ActivityController extends BaseController {
     private JwtService jwtService;
 
     @PostMapping("/activities")
-    public ResponseEntity<String> postActivity(@RequestBody PostRequest postRequest,
+    public ResponseEntity<?> postActivity(@RequestBody PostRequest postRequest,
                                                @RequestHeader("Authorization") String token) throws AccessDeniedException {
         String userIdFromToken = jwtService.extractUserId(token);
         log.info("POST /activities requested by userId={}", userIdFromToken);
@@ -43,14 +43,17 @@ public class ActivityController extends BaseController {
             log.warn("Access denied: token userId={} does not match request userId={}", userIdFromToken, postRequest.getUserId());
             throw new AccessDeniedException("You are not authorized to create this activity.");
         }
-
-        String createdActivity = activityService.createActivity(postRequest);
-        log.info("Activity created successfully: {}", createdActivity);
-        return new ResponseEntity<>(createdActivity, HttpStatus.CREATED);
+        try {
+            String createdActivity = activityService.createActivity(postRequest);
+            log.info("Activity created successfully: {}", createdActivity);
+            return ResponseEntity.status(HttpStatus.CREATED).body("success");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PutMapping("/activities/{activityId}")
-    public ResponseEntity<Void> updateActivity(@PathVariable Long activityId,
+    public ResponseEntity<?> updateActivity(@PathVariable Long activityId,
                                                @RequestBody PutRequest putRequest,
                                                @RequestHeader("Authorization") String token) throws AccessDeniedException {
         String userIdFromToken = jwtService.extractUserId(token);
@@ -63,10 +66,13 @@ public class ActivityController extends BaseController {
             log.warn("Access denied: userId={} is not owner of activityId={}", userIdFromToken, activityId);
             throw new AccessDeniedException("You are not authorized to update this activity.");
         }
-
-        boolean isUpdated = activityService.updateActivity(putRequest);
-        log.info("Activity update status for id {}: {}", activityId, isUpdated);
-        return isUpdated ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
+        try {
+            boolean isUpdated = activityService.updateActivity(putRequest);
+            log.info("Activity update status for id {}: {}", activityId, isUpdated);
+            return isUpdated ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/activities")
@@ -90,7 +96,9 @@ public class ActivityController extends BaseController {
                         activity.getTitle(),
                         activity.getContents(),
                         formatDateTime(activity.getDate(), activity.getStart()), // 'YYYY-MM-DD HH:mm'形式
-                        formatDateTime(activity.getDate(), activity.getEnd())  // 'YYYY-MM-DD HH:mm'形式
+                        formatDateTime(activity.getDate(), activity.getEnd()),  // 'YYYY-MM-DD HH:mm'形式
+                        activity.getCategory(),
+                        activity.getCategorySub()
                 ))
                 .collect(Collectors.toList());
     }

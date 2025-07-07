@@ -17,18 +17,22 @@ public class PostActivityEntity {
     private String end;   // 終了時間（String型）
     private String title; // アクティビティ名
     private String contents; // 内容
+    private String category;
+    private String categorySub;
     private Long createdBy; // 作成者のID
     private Date createdAt; // 作成日時
     private Long updatedBy; // 更新者のID
     private Date updatedAt; // 更新日時
 
-    public PostActivityEntity(long userId, Date date, String start, String end, String title, String contents, Long createdBy, Long updatedBy) {
+    public PostActivityEntity(long userId, Date date, String start, String end, String title, String contents, String category, String categorySub, Long createdBy, Long updatedBy) {
         this.userId = userId;
         this.date = date;
         this.start = start;
         this.end = end;
         this.title = title;
         this.contents = contents;
+        this.category = category;
+        this.categorySub = categorySub;
         this.createdBy = createdBy;
         this.updatedBy = updatedBy;
     }

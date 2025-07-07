@@ -1,5 +1,6 @@
 package importApp.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,4 +20,7 @@ public class PutRequest {
     private String start; // "HH:mm" 形式
     private String end;   // "HH:mm" 形式
     private String date;      // "yyyy-MM-dd" 形式
+    private String category;
+    @JsonProperty("category_sub")
+    private String categorySub;
 }

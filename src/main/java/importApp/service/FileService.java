@@ -94,6 +94,8 @@ public class FileService {
                         end,               // 終了時間
                         name,              // B列のアクティビティ名
                         contents,          // C列の説明
+                        "",               // category（Excelインポート時は空文字）
+                        "",               // categorySub（Excelインポート時は空文字）
                         (long) Integer.parseInt(userId),
                         convertToDate(LocalDateTime.now()), // 現在日時
                         null, // updatedByは未設定

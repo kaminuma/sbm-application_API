@@ -9,6 +9,8 @@
         <result property="end" column="end_time" />
         <result property="title" column="name" />
         <result property="contents" column="contents" />
+        <result property="category" column="category" />
+        <result property="categorySub" column="category_sub" />
         <result property="createdBy" column="created_by" />
         <result property="createdAt" column="created_at" />
         <result property="updatedBy" column="updated_by" />
@@ -16,8 +18,8 @@
     </resultMap>
 
     <insert id="save" useGeneratedKeys="true" keyProperty="activityId">
-        INSERT INTO activities (user_id, date, start_time, end_time, name, contents, created_at, created_by, updated_at, updated_by)
-        VALUES (#{userId}, #{date}, #{start}, #{end}, #{title}, #{contents}, #{createdAt}, #{createdBy}, #{updatedAt}, #{updatedBy})
+        INSERT INTO activities (user_id, date, start_time, end_time, name, contents, category, category_sub, created_at, created_by, updated_at, updated_by)
+        VALUES (#{userId}, #{date}, #{start}, #{end}, #{title}, #{contents}, #{category}, #{categorySub}, #{createdAt}, #{createdBy}, #{updatedAt}, #{updatedBy})
     </insert>
 
     <update id="updateActivity">
@@ -29,6 +31,8 @@
         end_time = #{end},
         name = #{title},
         contents = #{contents},
+        category = #{category},
+        category_sub = #{categorySub},
         updated_at = #{updatedAt},
         updated_by = #{updatedBy}
         WHERE activity_id = #{activityId}

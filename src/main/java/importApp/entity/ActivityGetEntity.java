@@ -21,6 +21,8 @@ public class ActivityGetEntity {
     private LocalTime end;
     private String title;
     private String contents;
+    private String category;
+    private String categorySub;
     private Long createdBy;
     private Date createdAt;
     private Long updatedBy;
@@ -32,6 +34,8 @@ public class ActivityGetEntity {
                           LocalTime end,
                           String title,
                           String contents,
+                          String category,
+                          String categorySub,
                           Long createdBy,
                           Long updatedBy) {
         this.userId = userId;
@@ -40,6 +44,8 @@ public class ActivityGetEntity {
         this.end= end;
         this.title = title;
         this.contents = contents;
+        this.category = category;
+        this.categorySub = categorySub;
         this.createdBy = createdBy;
         this.updatedBy = updatedBy;
     }

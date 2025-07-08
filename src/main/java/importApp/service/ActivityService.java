@@ -26,6 +26,16 @@ public class ActivityService {
     private ActivityDto activityDto;
 
     public String createActivity(PostRequest request) {
+        // バリデーション
+        if (request.getCategory() == null || request.getCategory().isEmpty()) {
+            throw new IllegalArgumentException("categoryは必須です");
+        }
+        if ("その他".equals(request.getCategory()) && (request.getCategorySub() == null || request.getCategorySub().isEmpty())) {
+            throw new IllegalArgumentException("category_subは必須です");
+        }
+        if (request.getCategorySub() == null) {
+            request.setCategorySub("");
+        }
         PostActivityEntity entity = modelMapper.map(request, PostActivityEntity.class);
         // 作成者と作成日時を設定
         entity.setCreatedAt(convertToDate(LocalDateTime.now()));
@@ -39,6 +49,16 @@ public class ActivityService {
     }
 
     public boolean updateActivity(PutRequest request) {
+        // バリデーション
+        if (request.getCategory() == null || request.getCategory().isEmpty()) {
+            throw new IllegalArgumentException("categoryは必須です");
+        }
+        if ("その他".equals(request.getCategory()) && (request.getCategorySub() == null || request.getCategorySub().isEmpty())) {
+            throw new IllegalArgumentException("category_subは必須です");
+        }
+        if (request.getCategorySub() == null) {
+            request.setCategorySub("");
+        }
         PostActivityEntity entity = modelMapper.map(request, PostActivityEntity.class);
         //　更新者と更新日時を設定
         entity.setUpdatedAt(convertToDate(LocalDateTime.now()));

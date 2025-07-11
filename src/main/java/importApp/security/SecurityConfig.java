@@ -51,7 +51,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         @Override
         public void addCorsMappings(CorsRegistry registry) {
             registry.addMapping("/**") // すべてのエンドポイントに適用
-                    .allowedOrigins("http://localhost:5173", "https://sbm-app.com", "https://www.sbm-app.com") // 本番用設定
+                    .allowedOrigins("http://localhost:5173",
+                    // 本番用設定
+                    "https://sbm-app.com",
+                    "https://www.sbm-app.com",
+                    "https://api.sbm-app.com" ) 
                     .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                     .allowedHeaders("*")
                     .allowCredentials(true);

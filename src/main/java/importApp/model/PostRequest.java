@@ -20,7 +20,6 @@ public class PostRequest {
     private String end;   // "HH:mm" 形式
     private String date;      // "yyyy-MM-dd" 形式
     private String category;
-    @JsonProperty("category_sub")
     private String categorySub;
 }
 

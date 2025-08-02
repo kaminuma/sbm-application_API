@@ -95,12 +95,7 @@ public class AuthController extends BaseController {
                         .body("Invalid Authorization header format");
             }
             String token = authHeader.replace("Bearer ", "");
-            // ユーザーIDを抽出する前に、JWTトークンを検証する
-            if (!jwtService.validateToken(token)) {
-                logger.warn("Invalid or expired JWT token");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("Invalid or expired token");
-            }
+            // JWTトークンからユーザーIDを抽出（検証はextractUserId内で例外として処理される）
             String userId = jwtService.extractUserId(token);
             
             // パスワード変更処理

@@ -6,6 +6,8 @@ import importApp.model.LoginRequest;
 import importApp.model.LoginResponse;
 import importApp.security.JwtService;
 import importApp.service.UserService;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,7 +89,13 @@ public class AuthController extends BaseController {
 
         try {
             // JWTトークンからユーザーIDを取得
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                logger.warn("Invalid Authorization header format");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Invalid Authorization header format");
+            }
             String token = authHeader.replace("Bearer ", "");
+            // JWTトークンからユーザーIDを抽出（検証はextractUserId内で例外として処理される）
             String userId = jwtService.extractUserId(token);
             
             // パスワード変更処理
@@ -103,10 +111,19 @@ public class AuthController extends BaseController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("Current password is incorrect");
             }
+        } catch (ExpiredJwtException e) {
+            // トークンが期限切れの場合
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Token has expired");
+        } catch (SignatureException e) {
+            // トークンの署名が不正な場合
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid token signature");
         } catch (Exception e) {
-            logger.error("Password change error", e);
+            // その他の予期せぬエラー（データベースエラーなど）
+            logger.error("An unexpected error occurred", e); // 詳細をログに出力
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Password change failed due to server error");
+                    .body("An unexpected error occurred");
         }
     }
 }

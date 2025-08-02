@@ -34,4 +34,20 @@ public class UserService {
         int result = userMapper.markUserAsDeleted(id);
         return result > 0;
     }
+
+    // パスワードを変更するメソッド
+    public boolean changePassword(Long userId, String currentPassword, String newPassword) {
+        // ユーザーの存在確認とパスワード検証
+        UserEntity user = userMapper.findById(userId);
+        if (user == null || !bCryptPasswordEncoder.matches(currentPassword, user.getPassword())) {
+            return false; // 現在のパスワードが間違っている
+        }
+        
+        // 新しいパスワードを暗号化
+        String encodedNewPassword = bCryptPasswordEncoder.encode(newPassword);
+        
+        // パスワード更新
+        int result = userMapper.updatePassword(userId, encodedNewPassword);
+        return result > 0;
+    }
 }

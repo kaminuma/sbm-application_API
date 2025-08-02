@@ -1,6 +1,7 @@
 package importApp.controller;
 
 import importApp.entity.UserEntity;
+import importApp.model.ChangePasswordRequest;
 import importApp.model.LoginRequest;
 import importApp.model.LoginResponse;
 import importApp.security.JwtService;
@@ -76,6 +77,36 @@ public class AuthController extends BaseController {
         } catch (Exception e) {
             logger.error("Error deleting user ID {}", id, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PutMapping("/auth/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request, 
+                                           @RequestHeader("Authorization") String authHeader) {
+        logger.info("Change password request received");
+
+        try {
+            // JWTトークンからユーザーIDを取得
+            String token = authHeader.replace("Bearer ", "");
+            String userId = jwtService.extractUserId(token);
+            
+            // パスワード変更処理
+            boolean isChanged = userService.changePassword(Long.valueOf(userId), 
+                                                         request.getCurrentPassword(), 
+                                                         request.getNewPassword());
+            
+            if (isChanged) {
+                logger.info("Password changed successfully for user ID: {}", userId);
+                return ResponseEntity.ok("Password changed successfully");
+            } else {
+                logger.warn("Password change failed: Invalid current password for user ID: {}", userId);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Current password is incorrect");
+            }
+        } catch (Exception e) {
+            logger.error("Password change error", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Password change failed due to server error");
         }
     }
 }

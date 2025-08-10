@@ -17,17 +17,20 @@ public class AIAnalysisRequestDto {
     private String endDate;
     
     @NotBlank(message = "分析焦点は必須です")
-    @Pattern(regexp = "MOOD_FOCUSED|ACTIVITY_FOCUSED|BALANCED|WELLNESS_FOCUSED")
+    @Pattern(regexp = "MOOD_FOCUSED|ACTIVITY_FOCUSED|BALANCED|WELLNESS_FOCUSED", 
+             message = "分析焦点は MOOD_FOCUSED, ACTIVITY_FOCUSED, BALANCED, WELLNESS_FOCUSED のいずれかである必要があります")
     @JsonProperty("analysis_focus")
     private String analysisFocus;
     
     @NotBlank(message = "詳細レベルは必須です")
-    @Pattern(regexp = "CONCISE|STANDARD|DETAILED")
+    @Pattern(regexp = "CONCISE|STANDARD|DETAILED", 
+             message = "詳細レベルは CONCISE, STANDARD, DETAILED のいずれかである必要があります")
     @JsonProperty("detail_level")
     private String detailLevel;
     
     @NotBlank(message = "応答スタイルは必須です")
-    @Pattern(regexp = "FRIENDLY|PROFESSIONAL|ENCOURAGING|CASUAL")
+    @Pattern(regexp = "FRIENDLY|PROFESSIONAL|ENCOURAGING|CASUAL", 
+             message = "応答スタイルは FRIENDLY, PROFESSIONAL, ENCOURAGING, CASUAL のいずれかである必要があります")
     @JsonProperty("response_style")
     private String responseStyle;
     

@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.SignatureException;
 
 @RestController
 @RequestMapping("/api/v1/ai")
@@ -43,7 +45,29 @@ public class AIController extends BaseController {
             }
             
             String token = authHeader.replace("Bearer ", "");
-            String userId = jwtService.extractUserId(token);
+            String userId;
+            
+            try {
+                userId = jwtService.extractUserId(token);
+            } catch (ExpiredJwtException e) {
+                logger.warn("JWT token has expired");
+                AIAnalysisResponseDto errorResponse = new AIAnalysisResponseDto();
+                errorResponse.setSuccess(false);
+                errorResponse.setError("認証トークンの有効期限が切れています。再ログインしてください。");
+                return ResponseEntity.status(401).body(errorResponse);
+            } catch (SignatureException e) {
+                logger.warn("Invalid JWT token signature");
+                AIAnalysisResponseDto errorResponse = new AIAnalysisResponseDto();
+                errorResponse.setSuccess(false);
+                errorResponse.setError("認証トークンが無効です。");
+                return ResponseEntity.status(401).body(errorResponse);
+            } catch (Exception e) {
+                logger.warn("JWT token validation error: {}", e.getMessage());
+                AIAnalysisResponseDto errorResponse = new AIAnalysisResponseDto();
+                errorResponse.setSuccess(false);
+                errorResponse.setError("認証エラーが発生しました。");
+                return ResponseEntity.status(401).body(errorResponse);
+            }
             
             // AI分析実行
             AIAnalysisResponseDto response = aiService.generateAnalysis(request, userId);

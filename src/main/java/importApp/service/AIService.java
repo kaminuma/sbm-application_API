@@ -11,6 +11,7 @@ import org.springframework.web.client.RestTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -243,6 +244,7 @@ public class AIService {
     private AIAnalysisResponseDto callGeminiAPI(String prompt) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("x-goog-api-key", geminiApiKey); // セキュリティ向上：ヘッダーでAPIキー送信
         
         // Gemini APIリクエストボディ構築
         Map<String, Object> requestBody = Map.of(
@@ -258,7 +260,7 @@ public class AIService {
         try {
             logger.info("Gemini API呼び出し開始");
             ResponseEntity<Map> response = restTemplate.exchange(
-                geminiApiUrl + "?key=" + geminiApiKey,
+                geminiApiUrl,  // URLからAPIキーパラメータを削除
                 HttpMethod.POST,
                 entity,
                 Map.class
@@ -292,8 +294,9 @@ public class AIService {
             // JSON部分を抽出
             String jsonText = extractJsonFromText(text);
             
-            // JSONをパース
-            Map<String, String> insights = objectMapper.readValue(jsonText, Map.class);
+            // JSONをパース（型安全性向上）
+            TypeReference<Map<String, String>> typeRef = new TypeReference<Map<String, String>>() {};
+            Map<String, String> insights = objectMapper.readValue(jsonText, typeRef);
             
             // レスポンス構築
             AIAnalysisResponseDto response = new AIAnalysisResponseDto();
@@ -320,14 +323,47 @@ public class AIService {
     }
     
     private String extractJsonFromText(String text) {
-        // ```json と ``` に囲まれた部分、または { } に囲まれた部分を抽出
-        int jsonStart = text.indexOf("{");
-        int jsonEnd = text.lastIndexOf("}");
-        
-        if (jsonStart != -1 && jsonEnd != -1 && jsonEnd > jsonStart) {
-            return text.substring(jsonStart, jsonEnd + 1);
+        // ```json マーカーがある場合の処理
+        if (text.contains("```json")) {
+            int jsonStart = text.indexOf("```json") + 7;
+            int jsonEnd = text.indexOf("```", jsonStart);
+            if (jsonEnd > jsonStart) {
+                return text.substring(jsonStart, jsonEnd).trim();
+            }
         }
         
-        throw new RuntimeException("JSON形式の回答が見つかりませんでした");
+        // { } に囲まれた部分を抽出（より安全な方法）
+        int braceCount = 0;
+        int jsonStart = -1;
+        int jsonEnd = -1;
+        
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (c == '{') {
+                if (braceCount == 0) {
+                    jsonStart = i;
+                }
+                braceCount++;
+            } else if (c == '}') {
+                braceCount--;
+                if (braceCount == 0 && jsonStart != -1) {
+                    jsonEnd = i + 1;
+                    break;
+                }
+            }
+        }
+        
+        if (jsonStart != -1 && jsonEnd > jsonStart) {
+            String jsonText = text.substring(jsonStart, jsonEnd);
+            // JSON構文の基本的な検証
+            try {
+                objectMapper.readTree(jsonText); // 構文チェックのみ
+                return jsonText;
+            } catch (Exception e) {
+                logger.warn("抽出されたJSONの構文が無効です: {}", e.getMessage());
+            }
+        }
+        
+        throw new RuntimeException("有効なJSON形式の回答が見つかりませんでした");
     }
 }

@@ -1,13 +1,19 @@
 package importApp.service;
 
+import importApp.entity.AuthProvider;
 import importApp.entity.UserEntity;
 import importApp.mapper.UserMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
     private UserMapper userMapper;
@@ -49,5 +55,59 @@ public class UserService {
         // パスワード更新
         int result = userMapper.updatePassword(userId, encodedNewPassword);
         return result > 0;
+    }
+
+    @Transactional
+    public UserEntity processOAuthPostLogin(String email, String googleId, String name, 
+                                          String picture, Boolean emailVerified) {
+        
+        logger.info("Processing OAuth2 login: email={}, googleId={}", email, googleId);
+        
+        UserEntity existingUser = userMapper.findByGoogleId(googleId);
+        
+        if (existingUser != null) {
+            logger.info("Existing Google user found: userId={}", existingUser.getUser_id());
+            existingUser.setProfileImageUrl(picture);
+            existingUser.setIsEmailVerified(emailVerified);
+            userMapper.updateUser(existingUser);
+            return existingUser;
+        }
+
+        UserEntity localUser = userMapper.findByEmail(email);
+        if (localUser != null && localUser.getProvider() == AuthProvider.LOCAL) {
+            logger.info("Linking existing local user with Google account: userId={}", localUser.getUser_id());
+            localUser.setGoogleId(googleId);
+            localUser.setProvider(AuthProvider.GOOGLE);
+            localUser.setProfileImageUrl(picture);
+            localUser.setIsEmailVerified(emailVerified);
+            userMapper.updateUser(localUser);
+            return localUser;
+        }
+
+        logger.info("Creating new Google user: email={}", email);
+        UserEntity newUser = new UserEntity();
+        newUser.setEmail(email);
+        newUser.setUsername(generateUsernameFromEmail(email));
+        newUser.setProvider(AuthProvider.GOOGLE);
+        newUser.setGoogleId(googleId);
+        newUser.setProfileImageUrl(picture);
+        newUser.setIsEmailVerified(emailVerified);
+
+        userMapper.insertUser(newUser);
+        logger.info("New Google user created: userId={}", newUser.getUser_id());
+        return newUser;
+    }
+
+    private String generateUsernameFromEmail(String email) {
+        String baseUsername = email.split("@")[0];
+        String username = baseUsername;
+        int suffix = 1;
+        
+        while (userMapper.findByUsername(username) != null) {
+            username = baseUsername + suffix++;
+        }
+        
+        logger.info("Generated username: {} from email: {}", username, email);
+        return username;
     }
 }

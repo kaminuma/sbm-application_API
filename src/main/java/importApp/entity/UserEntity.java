@@ -22,7 +22,24 @@ public class UserEntity {
     @Email
     private String email;
 
-    @NotBlank
     @Size(min = 8)
-    private String password;
+    private String password; // null許可（Googleユーザー用）
+
+    @Column(name = "provider")
+    @Enumerated(EnumType.STRING)
+    private AuthProvider provider = AuthProvider.LOCAL;
+
+    @Column(name = "google_id")
+    private String googleId;
+
+    @Column(name = "profile_image_url")
+    private String profileImageUrl;
+
+    @Column(name = "is_email_verified")
+    private Boolean isEmailVerified = false;
+
+    public UserEntity() {
+        this.provider = AuthProvider.LOCAL;
+        this.isEmailVerified = false;
+    }
 }

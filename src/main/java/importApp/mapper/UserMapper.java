@@ -12,5 +12,9 @@ public interface UserMapper {
     UserEntity findById(@Param("id") Long id);
     int markUserAsDeleted(@Param("id") Long id);
     int updatePassword(@Param("userId") Long userId, @Param("newPassword") String newPassword);
+    
+    UserEntity findByGoogleId(@Param("googleId") String googleId);
+    
+    void updateUser(UserEntity user);
 
 }

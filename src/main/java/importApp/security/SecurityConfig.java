@@ -49,16 +49,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public static class WebConfig implements WebMvcConfigurer {
 
         @Override
-        public void addCorsMappings(CorsRegistry registry) {
-            registry.addMapping("/**") // すべてのエンドポイントに適用
-                    .allowedOrigins("http://localhost:5173",
-                    // 本番用設定
-                    "https://sbm-app.com",
-                    "https://www.sbm-app.com",
-                    "https://api.sbm-app.com" ) 
-                    .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                    .allowedHeaders("*")
-                    .allowCredentials(true);
-        }
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**") // すべてのエンドポイントに適用
+            .allowedOriginPatterns(
+                "http://localhost:5173",
+                // 本番用設定
+                "https://sbm-app.com",
+                "https://*.sbm-app.com"
+            )
+            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+            .allowedHeaders("*")
+            .allowCredentials(true);
+    }
     }
 }

@@ -15,7 +15,6 @@ import io.jsonwebtoken.SignatureException;
 
 @RestController
 @RequestMapping("/api/v1/ai")
-@CrossOrigin(origins = "*")
 public class AIController extends BaseController {
 
     private static final Logger logger = LoggerFactory.getLogger(AIController.class);

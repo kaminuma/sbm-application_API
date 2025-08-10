@@ -38,3 +38,59 @@ out/
 
 ### docs
 docs/
+
+### Config files with secrets
+src/main/resources/application-local.yml
+
+### AI and ML related files
+*.model
+*.pkl
+*.h5
+*.pb
+*.onnx
+*.tflite
+embeddings/
+models/
+training_data/
+datasets/
+*.ipynb
+.jupyter/
+
+### Documentation and temporary files
+*.tmp
+*.temp
+*.log
+*.out
+logs/
+temp/
+tmp/
+*.draft
+*.backup
+*.orig
+*.swp
+*.swo
+*~
+
+### API Keys and credentials
+*.key
+*.pem
+*.p12
+*.pfx
+secrets.txt
+credentials.json
+service-account.json
+.env.local
+.env.prod
+
+### Security scan reports
+dependency-check-report.html
+dependency-check-report.json
+dependency-check-report.xml
+dependency-check-junit.xml
+dependency-check-vulnerability.json
+
+### MCP (Model Context Protocol) configuration
+.mcp.json
+mcp-config.json
+.claude/
+.serena

@@ -44,6 +44,14 @@
         and is_deleted = false
     </select>
 
+    <select id="findActivitiesByUserIdAndDateRange" resultMap="ActivityEntityResultMap">
+        SELECT * FROM activities
+        WHERE user_id = #{userId}
+        and date BETWEEN #{startDate} AND #{endDate}
+        and is_deleted = false
+        ORDER BY date, start_time
+    </select>
+
     <update id="markActivityAsDeleted">
         UPDATE activities
         SET is_deleted = true

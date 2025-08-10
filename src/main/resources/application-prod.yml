@@ -38,3 +38,19 @@ gemini:
   api:
     key: dummy_gemini_key
     url: "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent"
+
+# ログ設定
+logging:
+  level:
+    importApp: INFO
+    org.springframework.web: WARN
+    org.hibernate: WARN
+    com.mysql: WARN
+    root: INFO
+  file:
+    path: logs
+    name: logs/application.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 30

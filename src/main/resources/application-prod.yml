@@ -33,3 +33,8 @@ jwt:
 analyzer:
   api:
     base-url: "http://localhost:5000/api/v1"
+
+gemini:
+  api:
+    key: dummy_gemini_key
+    url: "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent"

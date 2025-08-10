@@ -15,6 +15,8 @@ public interface MoodRecordMapper {
     
     List<MoodRecordEntity> findMoodRecordsByUserId(Long userId);
     
+    List<MoodRecordEntity> findMoodRecordsByUserIdAndDateRange(@Param("userId") Long userId, @Param("startDate") String startDate, @Param("endDate") String endDate);
+    
     MoodRecordEntity findMoodRecordByUserIdAndDate(@Param("userId") Long userId, @Param("date") Date date);
     
     int updateMoodRecord(MoodRecordEntity moodRecord);

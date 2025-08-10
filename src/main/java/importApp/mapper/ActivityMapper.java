@@ -18,6 +18,8 @@ public interface ActivityMapper {
 
     List<ActivityGetEntity> findActivitiesByUserId(long userId);
 
+    List<ActivityGetEntity> findActivitiesByUserIdAndDateRange(@Param("userId") long userId, @Param("startDate") String startDate, @Param("endDate") String endDate);
+
     int markActivityAsDeleted(@Param("id") Long id);
 
     int updateActivity(PostActivityEntity activity);

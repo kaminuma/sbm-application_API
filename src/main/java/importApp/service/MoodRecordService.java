@@ -86,6 +86,10 @@ public class MoodRecordService {
                 .collect(Collectors.toList());
     }
 
+    public List<MoodRecordEntity> getMoodRecordsByUserAndDateRange(String userId, String startDate, String endDate) {
+        return moodRecordMapper.findMoodRecordsByUserIdAndDateRange(Long.parseLong(userId), startDate, endDate);
+    }
+
     public String deleteMoodRecord(Long userId, String date) {
         Date recordDate = parseDate(date);
         int deletedRows = moodRecordMapper.deleteMoodRecordByUserIdAndDate(userId, recordDate);

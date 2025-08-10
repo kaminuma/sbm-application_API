@@ -73,6 +73,10 @@ public class ActivityService {
     public List<ActivityGetEntity> findActivitiesByUserId(long userId) {
         return activityMapper.findActivitiesByUserId(userId);
     }
+
+    public List<ActivityGetEntity> getActivitiesByUserAndDateRange(String userId, String startDate, String endDate) {
+        return activityMapper.findActivitiesByUserIdAndDateRange(Long.parseLong(userId), startDate, endDate);
+    }
     public boolean deleteActivity(Long id) {
         int result = activityMapper.markActivityAsDeleted(id);
         return result > 0;

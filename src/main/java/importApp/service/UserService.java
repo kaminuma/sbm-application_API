@@ -43,9 +43,20 @@ public class UserService {
 
     // パスワードを変更するメソッド
     public boolean changePassword(Long userId, String currentPassword, String newPassword) {
-        // ユーザーの存在確認とパスワード検証
+        // ユーザーの存在確認
         UserEntity user = userMapper.findById(userId);
-        if (user == null || !bCryptPasswordEncoder.matches(currentPassword, user.getPassword())) {
+        if (user == null) {
+            return false;
+        }
+
+        // OAuth ユーザーはパスワード変更不可
+        if (user.getProvider() == AuthProvider.GOOGLE) {
+            logger.warn("Password change attempt for OAuth user: userId={}, provider={}", userId, user.getProvider());
+            throw new IllegalStateException("Password change is not allowed for OAuth users");
+        }
+
+        // ローカルユーザーのパスワード検証
+        if (user.getPassword() == null || !bCryptPasswordEncoder.matches(currentPassword, user.getPassword())) {
             return false; // 現在のパスワードが間違っている
         }
         

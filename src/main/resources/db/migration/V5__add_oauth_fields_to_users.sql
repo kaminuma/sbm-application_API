@@ -9,8 +9,8 @@ ADD COLUMN is_email_verified BOOLEAN DEFAULT FALSE COMMENT 'メール認証済�
 ALTER TABLE users 
 MODIFY COLUMN password VARCHAR(255) NULL;
 
--- インデックス追加
-CREATE UNIQUE INDEX idx_users_google_id ON users(google_id);
+-- インデックス追加（部分ユニークインデックスでNULL値を除外）
+CREATE UNIQUE INDEX idx_users_google_id ON users(google_id) WHERE google_id IS NOT NULL;
 CREATE INDEX idx_users_provider ON users(provider);
 
 -- 既存データ対応

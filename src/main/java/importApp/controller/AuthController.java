@@ -6,6 +6,7 @@ import importApp.model.LoginRequest;
 import importApp.model.LoginResponse;
 import importApp.security.JwtService;
 import importApp.service.UserService;
+import importApp.service.OAuth2SessionService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.SignatureException;
 import org.slf4j.Logger;
@@ -25,6 +26,9 @@ public class AuthController extends BaseController {
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private OAuth2SessionService sessionService;
 
     @PostMapping("/auth/register")
     public ResponseEntity<?> register(@RequestBody UserEntity user) {
@@ -111,6 +115,11 @@ public class AuthController extends BaseController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("Current password is incorrect");
             }
+        } catch (IllegalStateException e) {
+            // OAuth ユーザーのパスワード変更試行
+            logger.warn("Invalid password change attempt: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
         } catch (ExpiredJwtException e) {
             // トークンが期限切れの場合
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -124,6 +133,27 @@ public class AuthController extends BaseController {
             logger.error("An unexpected error occurred", e); // 詳細をログに出力
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("An unexpected error occurred");
+        }
+    }
+
+    @PostMapping("/auth/oauth2/session")
+    public ResponseEntity<?> getOAuth2Session(@RequestParam String sessionId) {
+        logger.info("OAuth2 session request received: sessionId={}", sessionId);
+
+        try {
+            OAuth2SessionService.SessionData sessionData = sessionService.getAndRemoveSession(sessionId);
+            
+            if (sessionData == null) {
+                logger.warn("Invalid or expired session: {}", sessionId);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Invalid or expired session");
+            }
+
+            return ResponseEntity.ok(new LoginResponse(sessionData.getJwt(), sessionData.getUserId()));
+        } catch (Exception e) {
+            logger.error("OAuth2 session processing error", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Session processing failed");
         }
     }
 }

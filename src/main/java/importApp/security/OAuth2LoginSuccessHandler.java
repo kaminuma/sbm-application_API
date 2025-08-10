@@ -2,6 +2,7 @@ package importApp.security;
 
 import importApp.entity.UserEntity;
 import importApp.service.UserService;
+import importApp.service.OAuth2SessionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,9 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     @Autowired
     private JwtService jwtService;
 
+    @Autowired
+    private OAuth2SessionService sessionService;
+
     @Value("${app.frontend-url:http://localhost:5173}")
     private String frontendUrl;
 
@@ -55,9 +59,9 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
             String jwt = jwtService.generateToken(String.valueOf(user.getUser_id()));
 
-            String encodedToken = URLEncoder.encode(jwt, StandardCharsets.UTF_8);
-            String redirectUrl = String.format("%s/login/callback?token=%s&userId=%s", 
-                                             frontendUrl, encodedToken, user.getUser_id());
+            // セキュアなセッション経由でJWT受け渡し
+            String sessionId = sessionService.createSession(jwt, String.valueOf(user.getUser_id()));
+            String redirectUrl = String.format("%s/login/callback?session=%s", frontendUrl, sessionId);
             
             logger.info("OAuth2 login successful, redirecting to: {}", frontendUrl + "/login/callback");
             response.sendRedirect(redirectUrl);

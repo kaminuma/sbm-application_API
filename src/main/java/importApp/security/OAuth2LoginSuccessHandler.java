@@ -35,6 +35,9 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     @Value("${app.frontend-url}")
     private String frontendUrl;
+    
+    @Value("${app.mobile-callback-url:sbmapp://auth/callback}")
+    private String mobileCallbackUrl;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, 
@@ -61,9 +64,23 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
             // セキュアなセッション経由でJWT受け渡し
             String sessionId = sessionService.createSession(jwt, String.valueOf(user.getUser_id()));
-            String redirectUrl = String.format("%s/login/callback?session=%s", frontendUrl, sessionId);
             
-            logger.info("OAuth2 login successful, redirecting to: {}", frontendUrl + "/login/callback");
+            // User-Agentからモバイルアプリを判定
+            String userAgent = request.getHeader("User-Agent");
+            boolean isMobileApp = userAgent != null && userAgent.contains("SBMApp");
+            
+            // リダイレクト先を判定
+            String redirectUrl;
+            if (isMobileApp) {
+                // モバイルアプリの場合はカスタムスキームにリダイレクト
+                redirectUrl = String.format("%s?session=%s", mobileCallbackUrl, sessionId);
+                logger.info("OAuth2 login successful (mobile app), redirecting to: {}", redirectUrl);
+            } else {
+                // Webの場合は既存のURL
+                redirectUrl = String.format("%s/login/callback?session=%s", frontendUrl, sessionId);
+                logger.info("OAuth2 login successful (web), redirecting to: {}", redirectUrl);
+            }
+            
             response.sendRedirect(redirectUrl);
 
         } catch (Exception e) {

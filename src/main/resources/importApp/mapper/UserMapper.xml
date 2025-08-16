@@ -4,9 +4,9 @@
 
 <mapper namespace="importApp.mapper.UserMapper">
 
-    <insert id="insertUser" parameterType="importApp.entity.UserEntity">
-        INSERT INTO users (user_name, password, email)
-        VALUES (#{username}, #{password}, #{email})
+    <insert id="insertUser" parameterType="importApp.entity.UserEntity" useGeneratedKeys="true" keyProperty="user_id">
+        INSERT INTO users (user_name, password, email, provider, google_id, profile_image_url, is_email_verified)
+        VALUES (#{username}, #{password}, #{email}, #{provider}, #{googleId}, #{profileImageUrl}, #{isEmailVerified})
     </insert>
 
     <select id="findByEmail" resultType="importApp.entity.UserEntity">
@@ -28,4 +28,25 @@
     <update id="updatePassword">
         UPDATE users SET password = #{newPassword} WHERE user_id = #{userId}
     </update>
+
+    <select id="findByGoogleId" resultType="importApp.entity.UserEntity">
+        SELECT * FROM users 
+        WHERE google_id = #{googleId} 
+        AND provider = 'GOOGLE'
+        AND user_id IS NOT NULL
+    </select>
+    
+    <update id="updateUser" parameterType="importApp.entity.UserEntity">
+        UPDATE users 
+        <set>
+            <if test="username != null">user_name = #{username},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="provider != null">provider = #{provider},</if>
+            <if test="googleId != null">google_id = #{googleId},</if>
+            <if test="profileImageUrl != null">profile_image_url = #{profileImageUrl},</if>
+            <if test="isEmailVerified != null">is_email_verified = #{isEmailVerified}</if>
+        </set>
+        WHERE user_id = #{user_id}
+    </update>
+
 </mapper>

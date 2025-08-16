@@ -11,6 +11,21 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
 #        ddl-auto: validate エンティティとデータベーススキーマが一致しているか検証
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: dummy_google_client_id
+            client-secret: dummy_google_client_secret
+            scope: openid, email, profile
+            redirect-uri: "${app.base-url}/login/oauth2/code/google"
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v2/userinfo
+            user-name-attribute: email
   servlet:
     multipart:
       enabled: true
@@ -29,6 +44,10 @@ spring:
 
 jwt:
   secret: dummy_jwt_secret
+
+app:
+  base-url: "https://api.sbm-app.com"
+  frontend-url: "https://sbm-app.com"
 
 analyzer:
   api:

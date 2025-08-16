@@ -33,7 +33,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     @Autowired
     private OAuth2SessionService sessionService;
 
-    @Value("${app.frontend-url:http://localhost:5173}")
+    @Value("${app.frontend-url}")
     private String frontendUrl;
 
     @Override

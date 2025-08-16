@@ -1,8 +1,8 @@
 package importApp.entity;
 
 public enum AuthProvider {
-    LOCAL("local"),
-    GOOGLE("google");
+    LOCAL("LOCAL"),
+    GOOGLE("GOOGLE");
 
     private final String value;
 

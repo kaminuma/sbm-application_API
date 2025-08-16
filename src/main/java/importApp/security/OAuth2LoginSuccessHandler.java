@@ -65,14 +65,9 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             // セキュアなセッション経由でJWT受け渡し
             String sessionId = sessionService.createSession(jwt, String.valueOf(user.getUser_id()));
             
-            // モバイルアプリからのリクエストを判定
-            String userAgent = request.getHeader("User-Agent");
-            String referer = request.getHeader("Referer");
-            String mobileParam = request.getParameter("mobile");
-            
-            boolean isMobileApp = (userAgent != null && userAgent.contains("SBMApp")) || 
-                                 "true".equals(mobileParam) ||
-                                 (referer != null && referer.contains("mobile=true"));
+            // モバイルアプリからのリクエストを判定（stateパラメータで確実に判定）
+            String state = request.getParameter("state");
+            boolean isMobileApp = state != null && state.contains("mobile=true");
             
             // リダイレクト先を判定
             String redirectUrl;

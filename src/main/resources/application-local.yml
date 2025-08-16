@@ -47,6 +47,7 @@ jwt:
 app:
   base-url: "http://localhost:8080"
   frontend-url: "http://localhost:5173"
+  mobile-callback-url: "sbmapp://auth/callback"
 
 analyzer:
   api:

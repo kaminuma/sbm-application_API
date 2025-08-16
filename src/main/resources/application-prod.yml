@@ -48,6 +48,7 @@ jwt:
 app:
   base-url: "https://api.sbm-app.com"
   frontend-url: "https://sbm-app.com"
+  mobile-callback-url: "sbmapp://auth/callback"
 
 analyzer:
   api:

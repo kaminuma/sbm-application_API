@@ -1,6 +1,4 @@
 spring:
-  thymeleaf:
-    prefix: file:src/main/resources/templates/
   datasource:
     url: jdbc:mysql://localhost:3306/importApp
     username: root
@@ -9,7 +7,24 @@ spring:
   jpa:
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL5Dialect
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        show_sql: true
+        format_sql: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope: openid, email, profile
+            redirect-uri: "http://localhost:8080/login/oauth2/code/google"
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v2/userinfo
+            user-name-attribute: email
   servlet:
     multipart:
       enabled: true
@@ -20,7 +35,6 @@ spring:
     location: classpath:db/migration
     baseline-on-migration: true
     baseline-version: 1
-
   mybatis:
     type-aliases-package: importApp.Entity
     mapper-locations: classpath:importApp/mapper/*.xml
@@ -28,7 +42,11 @@ spring:
       map-underscore-to-camel-case: true
 
 jwt:
-  secret: yourSecretKeyHere
+  secret: your_local_jwt_secret_change_in_production
+
+app:
+  base-url: "http://localhost:8080"
+  frontend-url: "http://localhost:5173"
 
 analyzer:
   api:
@@ -36,5 +54,10 @@ analyzer:
 
 gemini:
   api:
-    key: "dummy_local_key_for_testing"
+    key: dummy_gemini_key
     url: "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent"
+
+logging:
+  level:
+    importApp: DEBUG
+    org.springframework.security: DEBUG

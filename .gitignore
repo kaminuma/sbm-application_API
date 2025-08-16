@@ -81,6 +81,8 @@ credentials.json
 service-account.json
 .env.local
 .env.prod
+.env
+google-credentials.json
 
 ### Security scan reports
 dependency-check-report.html

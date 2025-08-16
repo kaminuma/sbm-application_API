@@ -47,6 +47,12 @@ public class AIService {
 
     public AIAnalysisResponseDto generateAnalysis(AIAnalysisRequestDto request, String userId) {
         
+        // Gemini APIキー検証
+        if (!isValidGeminiApiKey()) {
+            logger.error("Invalid or missing Gemini API key");
+            throw new IllegalStateException("AI service is not available due to configuration error");
+        }
+        
         try {
             // 1. データ取得
             List<ActivityGetEntity> activities = activityService.getActivitiesByUserAndDateRange(
@@ -365,5 +371,24 @@ public class AIService {
         }
         
         throw new RuntimeException("有効なJSON形式の回答が見つかりませんでした");
+    }
+
+    /**
+     * Gemini APIキーの基本的な検証
+     */
+    private boolean isValidGeminiApiKey() {
+        if (geminiApiKey == null || geminiApiKey.trim().isEmpty()) {
+            return false;
+        }
+        
+        // ダミーキーまたはプレースホルダーの除外
+        if (geminiApiKey.contains("dummy") || 
+            geminiApiKey.contains("placeholder") || 
+            geminiApiKey.contains("your_") ||
+            geminiApiKey.length() < 20) { // Gemini APIキーの最小長チェック
+            return false;
+        }
+        
+        return true;
     }
 }

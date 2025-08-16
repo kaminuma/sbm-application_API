@@ -36,6 +36,8 @@ jobs:
           sed -i "s/db_dummy_password/${{ secrets.DB_PASSWORD }}/g" src/main/resources/application-prod.yml
           sed -i "s/dummy_jwt_secret/${{ secrets.JWT_SECRET }}/g" src/main/resources/application-prod.yml
           sed -i "s/dummy_gemini_key/${{ secrets.GEMINI_API_KEY }}/g" src/main/resources/application-prod.yml
+          sed -i "s/dummy_google_client_id/${{ secrets.GOOGLE_CLIENT_ID }}/g" src/main/resources/application-prod.yml
+          sed -i "s/dummy_google_client_secret/${{ secrets.GOOGLE_CLIENT_SECRET }}/g" src/main/resources/application-prod.yml
 
       # 4. Gradleでビルド
       - name: Build with Gradle

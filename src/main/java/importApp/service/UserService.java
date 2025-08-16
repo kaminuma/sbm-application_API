@@ -80,8 +80,19 @@ public class UserService {
         
         if (existingUser != null) {
             logger.info("Existing Google user found: userId={}", existingUser.getUser_id());
-            existingUser.setProfileImageUrl(picture);
-            existingUser.setIsEmailVerified(emailVerified);
+            
+            // 更新対象の項目のみ設定（既存の値は保持）
+            if (picture != null && !picture.equals(existingUser.getProfileImageUrl())) {
+                existingUser.setProfileImageUrl(picture);
+            }
+            if (emailVerified != null && !emailVerified.equals(existingUser.getIsEmailVerified())) {
+                existingUser.setIsEmailVerified(emailVerified);
+            }
+            
+            // usernameは必ず既存の値を保持（nullで上書きしない）
+            // DBから取得した値がそのまま保持される
+            
+            logger.info("Updating user profile for userId: {}", existingUser.getUser_id());
             userMapper.updateUser(existingUser);
             return existingUser;
         }

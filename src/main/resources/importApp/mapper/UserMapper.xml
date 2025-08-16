@@ -38,12 +38,14 @@
     
     <update id="updateUser" parameterType="importApp.entity.UserEntity">
         UPDATE users 
-        SET user_name = #{username},
-            email = #{email},
-            provider = #{provider},
-            google_id = #{googleId},
-            profile_image_url = #{profileImageUrl},
-            is_email_verified = #{isEmailVerified}
+        <set>
+            <if test="username != null">user_name = #{username},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="provider != null">provider = #{provider},</if>
+            <if test="googleId != null">google_id = #{googleId},</if>
+            <if test="profileImageUrl != null">profile_image_url = #{profileImageUrl},</if>
+            <if test="isEmailVerified != null">is_email_verified = #{isEmailVerified}</if>
+        </set>
         WHERE user_id = #{user_id}
     </update>
 

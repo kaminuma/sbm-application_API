@@ -25,6 +25,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    
+    @Autowired
+    private MobileOAuth2AuthorizationRequestResolver mobileAuthorizationRequestResolver;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -40,6 +43,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated() // それ以外は認証が必要
                 .and()
                 .oauth2Login()
+                    .authorizationEndpoint()
+                        .authorizationRequestResolver(mobileAuthorizationRequestResolver)
+                    .and()
                     .successHandler(oAuth2LoginSuccessHandler)
                     .failureUrl("/login?error=oauth2_error")
                 .and()

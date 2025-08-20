@@ -125,13 +125,5 @@ MySQLのrootパスワードは `docker-compose.yml` の `MYSQL_ROOT_PASSWORD` �
 
 ---
 
-## 📚 ドキュメント
-
-- [`CHANGELOG.md`](CHANGELOG.md) - 変更履歴
-- [`docs/GOOGLE_AUTH_FRONTEND_SPEC.md`](docs/GOOGLE_AUTH_FRONTEND_SPEC.md) - フロントエンドGoogle認証実装仕様
-- [`docs/ANDROID_GOOGLE_AUTH_IMPLEMENTATION.md`](docs/ANDROID_GOOGLE_AUTH_IMPLEMENTATION.md) - Android Google認証実装ガイド
-
----
-
 ## 📜 License
 This project is licensed under the **Apache License 2.0**.

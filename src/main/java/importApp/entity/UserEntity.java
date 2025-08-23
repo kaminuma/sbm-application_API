@@ -37,9 +37,34 @@ public class UserEntity {
 
     @Column(name = "is_email_verified")
     private Boolean isEmailVerified = false;
+    
+    @Column(name = "ai_daily_limit")
+    private Integer aiDailyLimit = 5;
+    
+    @Column(name = "ai_monthly_limit")
+    private Integer aiMonthlyLimit = 50;
 
     public UserEntity() {
         this.provider = AuthProvider.LOCAL;
         this.isEmailVerified = false;
+        this.aiDailyLimit = 5;
+        this.aiMonthlyLimit = 50;
+    }
+    
+    // Getters for AI limits
+    public Integer getAiDailyLimit() {
+        return aiDailyLimit;
+    }
+    
+    public void setAiDailyLimit(Integer aiDailyLimit) {
+        this.aiDailyLimit = aiDailyLimit;
+    }
+    
+    public Integer getAiMonthlyLimit() {
+        return aiMonthlyLimit;
+    }
+    
+    public void setAiMonthlyLimit(Integer aiMonthlyLimit) {
+        this.aiMonthlyLimit = aiMonthlyLimit;
     }
 }

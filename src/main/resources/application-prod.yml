@@ -59,3 +59,11 @@ gemini:
     key: dummy_gemini_key
     url: "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent"
 
+ai:
+  limits:
+    enabled: true
+    debug-mode: false      # 本番環境では必ずfalse
+    debug-user-ids: ""     # 本番環境では空
+    default-daily: 5
+    default-monthly: 50
+

@@ -25,11 +25,15 @@ spring:
             token-uri: https://oauth2.googleapis.com/token
             user-info-uri: https://www.googleapis.com/oauth2/v2/userinfo
             user-name-attribute: email
-  servlet:
-    multipart:
-      enabled: true
-      max-file-size: 10MB
-      max-request-size: 10MB
+  server:
+    # すべてのネットワークインターフェースでリッスン：デバッグ用
+    address: 0.0.0.0
+    port: 8080
+    servlet:
+      multipart:
+        enabled: true
+        max-file-size: 10MB
+        max-request-size: 10MB
   flyway:
     enable: true
     location: classpath:db/migration
@@ -57,6 +61,14 @@ gemini:
   api:
     key: dummy_gemini_key
     url: "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent"
+
+ai:
+  limits:
+    enabled: ${AI_LIMITS_ENABLED:true}
+    debug-mode: ${AI_LIMITS_DEBUG_MODE:false}  # 本番モードに変更
+    default-daily: ${AI_LIMITS_DEFAULT_DAILY:5}
+    default-monthly: ${AI_LIMITS_DEFAULT_MONTHLY:50}
+    debug-user-ids: ${AI_LIMITS_DEBUG_USER_IDS:}  # 空に設定
 
 logging:
   level:

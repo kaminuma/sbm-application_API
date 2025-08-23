@@ -1,6 +1,7 @@
 package importApp.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Map;
 
 public class AIAnalysisResponseDto {
     
@@ -9,6 +10,9 @@ public class AIAnalysisResponseDto {
     
     @JsonProperty("data")
     private AIInsightData data;
+    
+    @JsonProperty("usage_info")
+    private Map<String, Object> usageInfo;
     
     public static class AIInsightData {
         
@@ -81,5 +85,13 @@ public class AIAnalysisResponseDto {
     
     public void setData(AIInsightData data) { 
         this.data = data; 
+    }
+    
+    public Map<String, Object> getUsageInfo() {
+        return usageInfo;
+    }
+    
+    public void setUsageInfo(Map<String, Object> usageInfo) {
+        this.usageInfo = usageInfo;
     }
 }

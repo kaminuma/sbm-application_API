@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="importApp.mapper.AIUsageLimitMapper">
+
+    <!-- Result Map -->
+    <resultMap id="AIUsageLimitResultMap" type="importApp.entity.AIUsageLimit">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="provider" column="provider"/>
+        <result property="date" column="date"/>
+        <result property="dailyCount" column="daily_count"/>
+        <result property="monthlyCount" column="monthly_count"/>
+        <result property="lastResetDate" column="last_reset_date"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <!-- ユーザーID、プロバイダー、日付で利用状況を取得 -->
+    <select id="findByUserAndDate" resultMap="AIUsageLimitResultMap">
+        SELECT 
+            id, user_id, provider, date, daily_count, monthly_count, 
+            last_reset_date, created_at, updated_at
+        FROM ai_api_usage_limits 
+        WHERE user_id = #{userId} 
+        AND provider = #{provider}
+        AND date = #{date}
+    </select>
+
+    <!-- 利用回数をインクリメント（UPSERT処理） -->
+    <insert id="incrementCount">
+        INSERT INTO ai_api_usage_limits 
+            (user_id, provider, date, daily_count, monthly_count, last_reset_date)
+        VALUES 
+            (#{userId}, #{provider}, #{date}, 1, 1, DATE_FORMAT(#{date}, '%Y-%m-01'))
+        ON DUPLICATE KEY UPDATE
+            daily_count = daily_count + 1,
+            monthly_count = CASE 
+                WHEN DATE_FORMAT(date, '%Y-%m') = DATE_FORMAT(#{date}, '%Y-%m') 
+                THEN monthly_count + 1 
+                ELSE 1 
+            END,
+            last_reset_date = DATE_FORMAT(#{date}, '%Y-%m-01'),
+            updated_at = CURRENT_TIMESTAMP
+    </insert>
+
+</mapper>

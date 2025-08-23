@@ -82,6 +82,7 @@ service-account.json
 .env.local
 .env.prod
 .env
+.env.debug
 google-credentials.json
 
 ### Security scan reports

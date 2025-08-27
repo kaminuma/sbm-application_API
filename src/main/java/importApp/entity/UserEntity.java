@@ -16,6 +16,7 @@ public class UserEntity {
 
     @NotBlank
     @Size(min = 3, max = 50)
+    @Column(name = "user_name")
     private String username;
 
     @NotBlank
@@ -43,12 +44,16 @@ public class UserEntity {
     
     @Column(name = "ai_monthly_limit")
     private Integer aiMonthlyLimit = 50;
+    
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
 
     public UserEntity() {
         this.provider = AuthProvider.LOCAL;
         this.isEmailVerified = false;
         this.aiDailyLimit = 5;
         this.aiMonthlyLimit = 50;
+        this.isDeleted = false;
     }
     
     // Getters for AI limits

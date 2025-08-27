@@ -1,18 +1,20 @@
 package importApp.controller;
 
 import importApp.entity.UserEntity;
+import importApp.mapper.UserMapper;
 import importApp.model.ChangePasswordRequest;
 import importApp.model.LoginRequest;
 import importApp.model.LoginResponse;
 import importApp.security.JwtService;
 import importApp.service.UserService;
 import importApp.service.OAuth2SessionService;
+import java.util.Map;
+import java.util.HashMap;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +32,9 @@ public class AuthController extends BaseController {
 
     @Autowired
     private OAuth2SessionService sessionService;
+
+    @Autowired
+    private UserMapper userMapper;
 
     @PostMapping("/auth/register")
     public ResponseEntity<?> register(@RequestBody UserEntity user) {
@@ -157,4 +162,76 @@ public class AuthController extends BaseController {
                     .body("Session processing failed");
         }
     }
+
+    @DeleteMapping("/auth/withdraw")
+    public ResponseEntity<?> withdraw(@RequestHeader("Authorization") String authHeader) {
+        logger.info("User withdrawal request received");
+        
+        try {
+            // Authorization ヘッダーの検証
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Invalid Authorization header format");
+            }
+            String token = authHeader.replace("Bearer ", "");
+            
+            // JWTトークンからユーザーIDを抽出
+            String userId = jwtService.extractUserId(token);
+            
+            // 退会処理を実行
+            boolean isDeleted = userService.deleteUser(Long.valueOf(userId));
+            
+            if (isDeleted) {
+                logger.info("User successfully withdrew: userId={}", userId);
+                return ResponseEntity.ok("User account successfully deleted");
+            } else {
+                logger.warn("Withdrawal failed for userId={} - user may already be deleted", userId);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Failed to delete user account");
+            }
+        } catch (ExpiredJwtException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Token has expired");
+        } catch (SignatureException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid token signature");
+        } catch (Exception e) {
+            logger.error("User withdrawal error", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An unexpected error occurred during withdrawal");
+        }
+    }
+
+    @GetMapping("/auth/user")
+    public ResponseEntity<?> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
+        try {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Invalid Authorization header format");
+            }
+            String token = authHeader.replace("Bearer ", "");
+            String userId = jwtService.extractUserId(token);
+            
+            UserEntity user = userMapper.findById(Long.valueOf(userId));
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            }
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("user_id", user.getUser_id());
+            response.put("username", user.getUsername());
+            response.put("email", user.getEmail());
+            response.put("profileImageUrl", user.getProfileImageUrl()); // nullでもOK
+            
+            return ResponseEntity.ok(response);
+        } catch (ExpiredJwtException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token has expired");
+        } catch (SignatureException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token signature");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An unexpected error occurred");
+        }
+    }
+
 }

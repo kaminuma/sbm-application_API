@@ -10,19 +10,36 @@
     </insert>
 
     <select id="findByEmail" resultType="importApp.entity.UserEntity">
-        SELECT * FROM users WHERE email = #{email}
+        SELECT * FROM users 
+        WHERE email = #{email} 
+        AND is_deleted = false
     </select>
 
     <select id="findByUsername" resultType="importApp.entity.UserEntity">
-        SELECT * FROM users WHERE user_name = #{username}
+        SELECT * FROM users 
+        WHERE user_name = #{username} 
+        AND is_deleted = false
     </select>
 
     <select id="findById" resultType="importApp.entity.UserEntity">
-        SELECT * FROM users WHERE user_id = #{id}
+        <!-- 
+        注意：MyBatisのmap-underscore-to-camel-caseが効かないため、明示的にエイリアスを指定しています
+        本来はSELECT *で動くべきですが、user_name -> username のマッピングが自動で行われないため冗長な記述になっています
+        TODO: 将来的にResultMapまたはフィールド名の統一を検討
+        -->
+        SELECT user_id,user_name as username, email, password, provider, google_id as googleId, 
+               profile_image_url as profileImageUrl, is_email_verified as isEmailVerified, 
+               ai_daily_limit as aiDailyLimit, ai_monthly_limit as aiMonthlyLimit, is_deleted as isDeleted
+        FROM users 
+        WHERE user_id = #{id} 
+        AND is_deleted = false
     </select>
 
     <update id="markUserAsDeleted">
-        UPDATE users SET is_deleted = true WHERE user_id = #{id}
+        UPDATE users 
+        SET is_deleted = true 
+        WHERE user_id = #{id} 
+        AND is_deleted = false
     </update>
 
     <update id="updatePassword">
@@ -34,6 +51,7 @@
         WHERE google_id = #{googleId} 
         AND provider = 'GOOGLE'
         AND user_id IS NOT NULL
+        AND is_deleted = false
     </select>
     
     <update id="updateUser" parameterType="importApp.entity.UserEntity">

@@ -72,6 +72,5 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SECRET_KEY }}
           script: |
-            sudo chmod 755 /srv/sbm/api
-            sudo chmod 644 /srv/sbm/api/*.jar
+            sudo chmod -R 755 /srv/sbm/api
             sudo chown -R ${{ secrets.USER }}:${{ secrets.USER }} /srv/sbm/api

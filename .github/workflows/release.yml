@@ -43,40 +43,6 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean Assemble -Dspring.profiles.active=prod --info
 
-      # ============= 旧SSH方式（復旧用にコメントアウト） =============
-      # 5. 成果物を転送（rsync）
-      # - name: Deploy with Rsync
-      #   uses: burnett01/rsync-deployments@5.1
-      #   with:
-      #     switches: '-avz --delete --rsync-path="sudo rsync"'
-      #     path: build/libs/*.jar
-      #     remote_path: /srv/sbm/api/
-      #     remote_host: ${{ secrets.HOST }}
-      #     remote_user: ${{ secrets.USER }}
-      #     remote_key: ${{ secrets.SECRET_KEY }}
-
-      # 6. EC2でアプリケーションを再起動
-      # - name: Restart application on EC2
-      #   uses: appleboy/ssh-action@v0.1.5
-      #   with:
-      #     host: ${{ secrets.HOST }}
-      #     username: ${{secrets.USER}}
-      #     key: ${{ secrets.SECRET_KEY }}
-      #     script: |
-      #       sudo systemctl restart sbm-app
-
-      # 権限を戻す
-      # - name: Reset permissions
-      #   uses: appleboy/ssh-action@v0.1.5
-      #   with:
-      #     host: ${{ secrets.HOST }}
-      #     username: ${{ secrets.USER }}
-      #     key: ${{ secrets.SECRET_KEY }}
-      #     script: |
-      #       sudo chmod -R 755 /srv/sbm/api
-      #       sudo chown -R ${{ secrets.USER }}:${{ secrets.USER }} /srv/sbm/api
-      # ============================================================
-
       # 5. AWS認証情報の設定（Session Manager用）
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2

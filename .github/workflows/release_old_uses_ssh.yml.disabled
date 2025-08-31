@@ -1,0 +1,76 @@
+name: Build and Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: prod
+
+    steps:
+      # 1. リポジトリをチェックアウト
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. JavaとGradleのセットアップ
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      #権限付与
+      - name: permission for gradlew
+        run: chmod +x ./gradlew
+
+      # 3. `application-dummy.yml`を置換
+      - name: Replace placeholders in application-dummy.yml
+        run: |
+          sed -i "s/db_dummy_host/${{ secrets.DB_HOST }}/g" src/main/resources/application-prod.yml
+          sed -i "s/db_dummy_port/${{ secrets.DB_PORT }}/g" src/main/resources/application-prod.yml
+          sed -i "s/db_dummy_name/${{ secrets.DB_NAME }}/g" src/main/resources/application-prod.yml
+          sed -i "s/db_dummy_username/${{ secrets.DB_USERNAME }}/g" src/main/resources/application-prod.yml
+          sed -i "s/db_dummy_password/${{ secrets.DB_PASSWORD }}/g" src/main/resources/application-prod.yml
+          sed -i "s/dummy_jwt_secret/${{ secrets.JWT_SECRET }}/g" src/main/resources/application-prod.yml
+          sed -i "s/dummy_gemini_key/${{ secrets.GEMINI_API_KEY }}/g" src/main/resources/application-prod.yml
+          sed -i "s/dummy_google_client_id/${{ secrets.GOOGLE_CLIENT_ID }}/g" src/main/resources/application-prod.yml
+          sed -i "s/dummy_google_client_secret/${{ secrets.GOOGLE_CLIENT_SECRET }}/g" src/main/resources/application-prod.yml
+
+      # 4. Gradleでビルド
+      - name: Build with Gradle
+        run: ./gradlew clean Assemble -Dspring.profiles.active=prod --info
+
+      # 5. 成果物を転送（rsync）
+      - name: Deploy with Rsync
+        uses: burnett01/rsync-deployments@5.1
+        with:
+          switches: '-avz --delete --rsync-path="sudo rsync"'
+          path: build/libs/*.jar
+          remote_path: /srv/sbm/api/
+          remote_host: ${{ secrets.HOST }}
+          remote_user: ${{ secrets.USER }}
+          remote_key: ${{ secrets.SECRET_KEY }}
+
+      # 6. EC2でアプリケーションを再起動
+      - name: Restart application on EC2
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{secrets.USER}}
+          key: ${{ secrets.SECRET_KEY }}
+          script: |
+            sudo systemctl restart sbm-app
+
+      # 権限を戻す
+      - name: Reset permissions
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SECRET_KEY }}
+          script: |
+            sudo chmod -R 755 /srv/sbm/api
+            sudo chown -R ${{ secrets.USER }}:${{ secrets.USER }} /srv/sbm/api

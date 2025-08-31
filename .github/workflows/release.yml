@@ -43,34 +43,142 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean Assemble -Dspring.profiles.active=prod --info
 
+      # ============= 旧SSH方式（復旧用にコメントアウト） =============
       # 5. 成果物を転送（rsync）
-      - name: Deploy with Rsync
-        uses: burnett01/rsync-deployments@5.1
-        with:
-          switches: '-avz --delete --rsync-path="sudo rsync"'
-          path: build/libs/*.jar
-          remote_path: /srv/sbm/api/
-          remote_host: ${{ secrets.HOST }}
-          remote_user: ${{ secrets.USER }}
-          remote_key: ${{ secrets.SECRET_KEY }}
+      # - name: Deploy with Rsync
+      #   uses: burnett01/rsync-deployments@5.1
+      #   with:
+      #     switches: '-avz --delete --rsync-path="sudo rsync"'
+      #     path: build/libs/*.jar
+      #     remote_path: /srv/sbm/api/
+      #     remote_host: ${{ secrets.HOST }}
+      #     remote_user: ${{ secrets.USER }}
+      #     remote_key: ${{ secrets.SECRET_KEY }}
 
       # 6. EC2でアプリケーションを再起動
-      - name: Restart application on EC2
-        uses: appleboy/ssh-action@v0.1.5
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{secrets.USER}}
-          key: ${{ secrets.SECRET_KEY }}
-          script: |
-            sudo systemctl restart sbm-app
+      # - name: Restart application on EC2
+      #   uses: appleboy/ssh-action@v0.1.5
+      #   with:
+      #     host: ${{ secrets.HOST }}
+      #     username: ${{secrets.USER}}
+      #     key: ${{ secrets.SECRET_KEY }}
+      #     script: |
+      #       sudo systemctl restart sbm-app
 
       # 権限を戻す
-      - name: Reset permissions
-        uses: appleboy/ssh-action@v0.1.5
+      # - name: Reset permissions
+      #   uses: appleboy/ssh-action@v0.1.5
+      #   with:
+      #     host: ${{ secrets.HOST }}
+      #     username: ${{ secrets.USER }}
+      #     key: ${{ secrets.SECRET_KEY }}
+      #     script: |
+      #       sudo chmod -R 755 /srv/sbm/api
+      #       sudo chown -R ${{ secrets.USER }}:${{ secrets.USER }} /srv/sbm/api
+      # ============================================================
+
+      # 5. AWS認証情報の設定（Session Manager用）
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.SECRET_KEY }}
-          script: |
-            sudo chmod -R 755 /srv/sbm/api
-            sudo chown -R ${{ secrets.USER }}:${{ secrets.USER }} /srv/sbm/api
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # 6. Session Manager経由でJARファイル転送（SSH不要）
+      - name: Deploy JAR file via Session Manager
+        run: |
+          # JARファイルをbase64エンコード
+          JAR_FILE=$(ls build/libs/*.jar | head -1)
+          JAR_BASE64=$(base64 -w 0 "$JAR_FILE")
+          
+          # Session Manager経由でJAR転送・配置
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[
+              \"sudo systemctl stop sbm-app\",
+              \"echo '$JAR_BASE64' | base64 -d > /tmp/sbm-app.jar\",
+              \"sudo mv /tmp/sbm-app.jar /srv/sbm/api/\",
+              \"sudo chmod 755 /srv/sbm/api/sbm-app.jar\",
+              \"sudo chown ${{ secrets.USER }}:${{ secrets.USER }} /srv/sbm/api/sbm-app.jar\"
+            ]" \
+            --region ${{ secrets.AWS_REGION }} \
+            --output text --query "Command.CommandId")
+          
+          # コマンド実行完了を待機（最大5分）
+          aws ssm wait command-executed \
+            --command-id $COMMAND_ID \
+            --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
+            --region ${{ secrets.AWS_REGION }}
+          
+          # 実行結果を確認
+          STATUS=$(aws ssm get-command-invocation \
+            --command-id $COMMAND_ID \
+            --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
+            --region ${{ secrets.AWS_REGION }} \
+            --output text --query "Status")
+          
+          if [ "$STATUS" != "Success" ]; then
+            echo "JAR deployment failed with status: $STATUS"
+            exit 1
+          fi
+
+      # 7. Session Manager経由でアプリケーション再起動
+      - name: Restart application via Session Manager  
+        run: |
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=["sudo systemctl start sbm-app"]' \
+            --region ${{ secrets.AWS_REGION }} \
+            --output text --query "Command.CommandId")
+          
+          # コマンド実行完了を待機
+          aws ssm wait command-executed \
+            --command-id $COMMAND_ID \
+            --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
+            --region ${{ secrets.AWS_REGION }}
+          
+          # 実行結果を確認
+          STATUS=$(aws ssm get-command-invocation \
+            --command-id $COMMAND_ID \
+            --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
+            --region ${{ secrets.AWS_REGION }} \
+            --output text --query "Status")
+          
+          if [ "$STATUS" != "Success" ]; then
+            echo "Application restart failed with status: $STATUS"
+            exit 1
+          fi
+
+      # 8. Session Manager経由で権限修正
+      - name: Fix permissions via Session Manager
+        run: |
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=[
+              "sudo chmod -R 755 /srv/sbm/api",
+              "sudo chown -R ${{ secrets.USER }}:${{ secrets.USER }} /srv/sbm/api"
+            ]' \
+            --region ${{ secrets.AWS_REGION }} \
+            --output text --query "Command.CommandId")
+          
+          # コマンド実行完了を待機
+          aws ssm wait command-executed \
+            --command-id $COMMAND_ID \
+            --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
+            --region ${{ secrets.AWS_REGION }}
+          
+          # 実行結果を確認
+          STATUS=$(aws ssm get-command-invocation \
+            --command-id $COMMAND_ID \
+            --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
+            --region ${{ secrets.AWS_REGION }} \
+            --output text --query "Status")
+          
+          if [ "$STATUS" != "Success" ]; then
+            echo "Permission fix failed with status: $STATUS"
+            exit 1
+          fi

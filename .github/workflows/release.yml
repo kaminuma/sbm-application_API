@@ -82,6 +82,7 @@ jobs:
             --document-name "AWS-RunShellScript" \
             --parameters "commands=[
               \"sudo systemctl stop sbm-app\",
+              \"which aws || (curl -s https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip && unzip -q awscliv2.zip && sudo ./aws/install)\",
               \"aws s3 cp s3://${{ env.S3_BUCKET }}/${{ env.S3_KEY }} /tmp/sbm-app.jar\",
               \"sudo mv /tmp/sbm-app.jar /srv/sbm/api/\",
               \"sudo chmod 755 /srv/sbm/api/sbm-app.jar\",

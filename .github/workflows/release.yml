@@ -85,20 +85,38 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # 6. Session Manager経由でJARファイル転送（SSH不要）
-      - name: Deploy JAR file via Session Manager
+      # 6. S3経由でJARファイル転送
+      - name: Upload JAR to S3
         run: |
-          # JARファイルをbase64エンコード
+          # JARファイルをS3にアップロード
           JAR_FILE=$(ls build/libs/*.jar | head -1)
-          JAR_BASE64=$(base64 -w 0 "$JAR_FILE")
+          JAR_NAME=$(basename "$JAR_FILE")
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          S3_KEY="deploys/${TIMESTAMP}/${JAR_NAME}"
           
-          # Session Manager経由でJAR転送・配置
+          # S3バケット名（既存または新規作成）
+          S3_BUCKET="sbm-deploy-${{ secrets.AWS_REGION }}"
+          
+          # バケットが存在しない場合は作成
+          aws s3 mb "s3://${S3_BUCKET}" --region ${{ secrets.AWS_REGION }} 2>/dev/null || true
+          
+          # JARをS3にアップロード
+          aws s3 cp "$JAR_FILE" "s3://${S3_BUCKET}/${S3_KEY}" \
+            --region ${{ secrets.AWS_REGION }}
+          
+          echo "S3_BUCKET=${S3_BUCKET}" >> $GITHUB_ENV
+          echo "S3_KEY=${S3_KEY}" >> $GITHUB_ENV
+
+      # 7. Session Manager経由でS3からダウンロード・デプロイ
+      - name: Deploy from S3 via Session Manager
+        run: |
+          # Session Manager経由でS3からダウンロード・配置
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \
             --document-name "AWS-RunShellScript" \
             --parameters "commands=[
               \"sudo systemctl stop sbm-app\",
-              \"echo '$JAR_BASE64' | base64 -d > /tmp/sbm-app.jar\",
+              \"aws s3 cp s3://${{ env.S3_BUCKET }}/${{ env.S3_KEY }} /tmp/sbm-app.jar\",
               \"sudo mv /tmp/sbm-app.jar /srv/sbm/api/\",
               \"sudo chmod 755 /srv/sbm/api/sbm-app.jar\",
               \"sudo chown ${{ secrets.USER }}:${{ secrets.USER }} /srv/sbm/api/sbm-app.jar\"
@@ -124,7 +142,18 @@ jobs:
             exit 1
           fi
 
-      # 7. Session Manager経由でアプリケーション再起動
+      # 8. S3の古いファイルを削除（7日以上前）
+      - name: Clean up old S3 files
+        run: |
+          # 7日以上前のデプロイファイルを削除
+          aws s3 rm "s3://${{ env.S3_BUCKET }}/deploys/" \
+            --recursive \
+            --region ${{ secrets.AWS_REGION }} \
+            --exclude "*" \
+            --include "deploys/*" \
+            --exclude "deploys/$(date -d '7 days ago' +%Y%m%d)*" || true
+
+      # 9. Session Manager経由でアプリケーション再起動
       - name: Restart application via Session Manager  
         run: |
           COMMAND_ID=$(aws ssm send-command \
@@ -152,7 +181,7 @@ jobs:
             exit 1
           fi
 
-      # 8. Session Manager経由で権限修正
+      # 10. Session Manager経由で権限修正
       - name: Fix permissions via Session Manager
         run: |
           COMMAND_ID=$(aws ssm send-command \

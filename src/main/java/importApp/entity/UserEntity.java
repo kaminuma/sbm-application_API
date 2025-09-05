@@ -5,6 +5,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -47,6 +48,12 @@ public class UserEntity {
     
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
+    
+    @Column(name = "failed_login_attempts")
+    private Integer failedLoginAttempts = 0;
+    
+    @Column(name = "account_locked_until")
+    private LocalDateTime accountLockedUntil;
 
     public UserEntity() {
         this.provider = AuthProvider.LOCAL;
@@ -54,6 +61,7 @@ public class UserEntity {
         this.aiDailyLimit = 5;
         this.aiMonthlyLimit = 50;
         this.isDeleted = false;
+        this.failedLoginAttempts = 0;
     }
     
     // Getters for AI limits

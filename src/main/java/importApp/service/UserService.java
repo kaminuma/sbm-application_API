@@ -2,6 +2,8 @@ package importApp.service;
 
 import importApp.entity.AuthProvider;
 import importApp.entity.UserEntity;
+import importApp.exception.AccountLockedException;
+import importApp.exception.BadCredentialsException;
 import importApp.mapper.UserMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,11 +12,15 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
 
 @Service
 public class UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+    
+    private static final int MAX_LOGIN_ATTEMPTS = 5;
+    private static final int LOCK_DURATION_MINUTES = 15;
 
     @Autowired
     private UserMapper userMapper;
@@ -29,13 +35,87 @@ public class UserService {
         userMapper.insertUser(user);
     }
 
-    // ログインユーザーを認証するメソッド
+    // ログインユーザーを認証するメソッド（アカウントロック機能付き）
     public UserEntity loginUser(String username, String password) {
         UserEntity user = userMapper.findByUsername(username);
-        if (user != null && bCryptPasswordEncoder.matches(password, user.getPassword())) {
-            return user; // 認証成功
+        
+        // ユーザーが存在しない場合
+        if (user == null) {
+            logger.warn("Login attempt for non-existent user: {}", username);
+            return null;
         }
-        return null; // 認証失敗
+        
+        // アカウントがロックされているかチェック
+        boolean wasLocked = isAccountLocked(user);
+        if (wasLocked) {
+            logger.warn("Login attempt for locked account: {}", username);
+            throw new AccountLockedException("アカウントがロックされています。" + 
+                getRemainingLockTime(user) + "分後に再度お試しください。");
+        }
+        
+        
+        // パスワード検証
+        if (bCryptPasswordEncoder.matches(password, user.getPassword())) {
+            // ログイン成功：失敗回数をリセット
+            if (user.getFailedLoginAttempts() > 0) {
+                userMapper.resetFailedLoginAttempts(username);
+                logger.info("Reset failed login attempts for user: {}", username);
+            }
+            return user;
+        } else {
+            // ログイン失敗：失敗回数を増加
+            handleFailedLogin(username, user);
+            return null;
+        }
+    }
+    
+    private boolean isAccountLocked(UserEntity user) {
+        if (user.getAccountLockedUntil() == null) {
+            return false;
+        }
+        
+        // ロック期間が過ぎている場合はリセット
+        if (LocalDateTime.now().isAfter(user.getAccountLockedUntil())) {
+            userMapper.resetFailedLoginAttempts(user.getUsername());
+            // userオブジェクトも更新（重要！）
+            user.setFailedLoginAttempts(0);
+            user.setAccountLockedUntil(null);
+            logger.info("Account lock expired, reset failed attempts for user: {}", user.getUsername());
+            return false;
+        }
+        
+        return true;
+    }
+    
+    private long getRemainingLockTime(UserEntity user) {
+        if (user.getAccountLockedUntil() == null) {
+            return 0;
+        }
+        long remainingMinutes = java.time.Duration.between(
+            LocalDateTime.now(), 
+            user.getAccountLockedUntil()
+        ).toMinutes();
+        return Math.max(1, remainingMinutes); // 最小1分を表示
+    }
+    
+    private void handleFailedLogin(String username, UserEntity user) {
+        int newAttemptCount = user.getFailedLoginAttempts() + 1;
+        userMapper.incrementFailedLoginAttempts(username);
+        
+        if (newAttemptCount >= MAX_LOGIN_ATTEMPTS) {
+            // アカウントをロック
+            LocalDateTime lockUntil = LocalDateTime.now().plusMinutes(LOCK_DURATION_MINUTES);
+            userMapper.lockAccount(username, lockUntil);
+            logger.warn("Account locked due to {} failed login attempts: {}", MAX_LOGIN_ATTEMPTS, username);
+            throw new AccountLockedException("ログインに" + MAX_LOGIN_ATTEMPTS + "回失敗したため、アカウントがロックされました。" +
+                LOCK_DURATION_MINUTES + "分後に再度お試しください。");
+        } else {
+            // 残り試行回数を通知
+            int remainingAttempts = MAX_LOGIN_ATTEMPTS - newAttemptCount;
+            logger.warn("Failed login attempt {} of {} for user: {}", newAttemptCount, MAX_LOGIN_ATTEMPTS, username);
+            throw new BadCredentialsException("ユーザー名またはパスワードが正しくありません。" +
+                "あと" + remainingAttempts + "回失敗するとアカウントがロックされます。");
+        }
     }
 
     public boolean deleteUser(Long id) {

@@ -1,6 +1,8 @@
 package importApp.controller;
 
 import importApp.entity.UserEntity;
+import importApp.exception.AccountLockedException;
+import importApp.exception.BadCredentialsException;
 import importApp.mapper.UserMapper;
 import importApp.model.ChangePasswordRequest;
 import importApp.model.LoginRequest;
@@ -52,7 +54,7 @@ public class AuthController extends BaseController {
 
     @PostMapping("/auth/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        logger.info("Login request received");
+        logger.info("Login request received for user: {}", loginRequest.getUsername());
 
         try {
             UserEntity user = userService.loginUser(loginRequest.getUsername(), loginRequest.getPassword());
@@ -64,12 +66,27 @@ public class AuthController extends BaseController {
                 return ResponseEntity.ok(new LoginResponse(token, userId));
             } else {
                 logger.warn("Login failed: Invalid username or password");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(new LoginResponse(null, null));
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error", "ユーザー名またはパスワードが正しくありません。");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
             }
+        } catch (AccountLockedException e) {
+            logger.warn("Login attempt for locked account: {}", e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("errorType", "ACCOUNT_LOCKED");
+            return ResponseEntity.status(HttpStatus.LOCKED).body(errorResponse); // 423 Locked
+        } catch (BadCredentialsException e) {
+            logger.warn("Failed login attempt: {}", e.getMessage());
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("errorType", "BAD_CREDENTIALS");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         } catch (Exception e) {
             logger.error("Login error", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Login failed due to server error");
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "ログインに失敗しました。しばらくしてからもう一度お試しください。");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 

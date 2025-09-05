@@ -10,13 +10,21 @@
     </insert>
 
     <select id="findByEmail" resultType="importApp.entity.UserEntity">
-        SELECT * FROM users 
+        SELECT user_id, user_name as username, email, password, provider, google_id as googleId, 
+               profile_image_url as profileImageUrl, is_email_verified as isEmailVerified, 
+               ai_daily_limit as aiDailyLimit, ai_monthly_limit as aiMonthlyLimit, is_deleted as isDeleted,
+               failed_login_attempts as failedLoginAttempts, account_locked_until as accountLockedUntil
+        FROM users 
         WHERE email = #{email} 
         AND is_deleted = false
     </select>
 
     <select id="findByUsername" resultType="importApp.entity.UserEntity">
-        SELECT * FROM users 
+        SELECT user_id, user_name as username, email, password, provider, google_id as googleId, 
+               profile_image_url as profileImageUrl, is_email_verified as isEmailVerified, 
+               ai_daily_limit as aiDailyLimit, ai_monthly_limit as aiMonthlyLimit, is_deleted as isDeleted,
+               failed_login_attempts as failedLoginAttempts, account_locked_until as accountLockedUntil
+        FROM users 
         WHERE user_name = #{username} 
         AND is_deleted = false
     </select>
@@ -29,7 +37,8 @@
         -->
         SELECT user_id,user_name as username, email, password, provider, google_id as googleId, 
                profile_image_url as profileImageUrl, is_email_verified as isEmailVerified, 
-               ai_daily_limit as aiDailyLimit, ai_monthly_limit as aiMonthlyLimit, is_deleted as isDeleted
+               ai_daily_limit as aiDailyLimit, ai_monthly_limit as aiMonthlyLimit, is_deleted as isDeleted,
+               failed_login_attempts as failedLoginAttempts, account_locked_until as accountLockedUntil
         FROM users 
         WHERE user_id = #{id} 
         AND is_deleted = false
@@ -47,7 +56,11 @@
     </update>
 
     <select id="findByGoogleId" resultType="importApp.entity.UserEntity">
-        SELECT * FROM users 
+        SELECT user_id, user_name as username, email, password, provider, google_id as googleId, 
+               profile_image_url as profileImageUrl, is_email_verified as isEmailVerified, 
+               ai_daily_limit as aiDailyLimit, ai_monthly_limit as aiMonthlyLimit, is_deleted as isDeleted,
+               failed_login_attempts as failedLoginAttempts, account_locked_until as accountLockedUntil
+        FROM users 
         WHERE google_id = #{googleId} 
         AND provider = 'GOOGLE'
         AND user_id IS NOT NULL
@@ -65,6 +78,27 @@
             <if test="isEmailVerified != null">is_email_verified = #{isEmailVerified}</if>
         </set>
         WHERE user_id = #{user_id}
+    </update>
+    
+    <update id="incrementFailedLoginAttempts">
+        UPDATE users 
+        SET failed_login_attempts = failed_login_attempts + 1
+        WHERE user_name = #{username}
+        AND is_deleted = false
+    </update>
+    
+    <update id="resetFailedLoginAttempts">
+        UPDATE users 
+        SET failed_login_attempts = 0, account_locked_until = NULL
+        WHERE user_name = #{username}
+        AND is_deleted = false
+    </update>
+    
+    <update id="lockAccount">
+        UPDATE users 
+        SET account_locked_until = #{lockedUntil}
+        WHERE user_name = #{username}
+        AND is_deleted = false
     </update>
 
 </mapper>

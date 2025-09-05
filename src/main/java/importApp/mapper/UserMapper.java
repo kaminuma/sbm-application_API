@@ -3,6 +3,7 @@ package importApp.mapper;
 import importApp.entity.UserEntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import java.time.LocalDateTime;
 
 @Mapper
 public interface UserMapper {
@@ -16,5 +17,9 @@ public interface UserMapper {
     UserEntity findByGoogleId(@Param("googleId") String googleId);
     
     void updateUser(UserEntity user);
+    
+    int incrementFailedLoginAttempts(@Param("username") String username);
+    int resetFailedLoginAttempts(@Param("username") String username);
+    int lockAccount(@Param("username") String username, @Param("lockedUntil") LocalDateTime lockedUntil);
 
 }

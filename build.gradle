@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'importApp'
-version = '0.5.0'
+version = '0.6.0'
 
 
 java {
@@ -43,9 +43,12 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	implementation 'io.jsonwebtoken:jjwt:0.9.1'
 	implementation 'org.apache.httpcomponents:httpclient:4.5.14'
-	dependencies {
-		implementation 'org.modelmapper:modelmapper:3.1.0' // 最新版を確認して使用してください
-	}
+	// ModelMapper
+	implementation 'org.modelmapper:modelmapper:3.1.0'
+	
+	// 画像処理ライブラリ
+	implementation 'net.coobird:thumbnailator:0.4.19'
+	implementation 'org.apache.tika:tika-core:2.9.1'
 
 }
 

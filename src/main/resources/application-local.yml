@@ -70,6 +70,10 @@ ai:
     default-monthly: ${AI_LIMITS_DEFAULT_MONTHLY:50}
     debug-user-ids: ${AI_LIMITS_DEBUG_USER_IDS:}  # 空に設定
 
+storage:
+  upload-dir: uploads/profiles
+  base-url: http://localhost:8080/uploads/profiles
+
 logging:
   level:
     importApp: DEBUG

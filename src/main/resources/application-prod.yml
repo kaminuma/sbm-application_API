@@ -66,3 +66,6 @@ ai:
     default-daily: 5
     default-monthly: 50
 
+storage:
+  upload-dir: ${STORAGE_DIR:uploads/profiles}  # 画像保存先
+  base-url: ${STORAGE_BASE_URL:https://api.sbm-app.com/uploads/profiles}  # 画像URL生成用

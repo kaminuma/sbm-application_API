@@ -100,5 +100,12 @@
         WHERE user_name = #{username}
         AND is_deleted = false
     </update>
+    
+    <update id="updateProfileImageUrl">
+        UPDATE users 
+        SET profile_image_url = #{profileImageUrl}
+        WHERE user_id = #{userId}
+        AND is_deleted = false
+    </update>
 
 </mapper>

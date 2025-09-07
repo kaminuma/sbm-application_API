@@ -92,6 +92,9 @@ dependency-check-report.xml
 dependency-check-junit.xml
 dependency-check-vulnerability.json
 
+## image uploads
+uploads/
+
 ### MCP (Model Context Protocol) configuration
 .mcp.json
 mcp-config.json

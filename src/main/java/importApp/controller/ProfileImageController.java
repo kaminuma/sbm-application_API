@@ -123,7 +123,7 @@ public class ProfileImageController extends BaseController {
                 return null;
             }
             
-            String token = authHeader.replace("Bearer ", "");
+            String token = authHeader.substring(7);
             return jwtService.extractUserId(token);
             
         } catch (ExpiredJwtException e) {

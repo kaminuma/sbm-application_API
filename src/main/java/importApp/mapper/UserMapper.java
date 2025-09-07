@@ -22,6 +22,6 @@ public interface UserMapper {
     int resetFailedLoginAttempts(@Param("username") String username);
     int lockAccount(@Param("username") String username, @Param("lockedUntil") LocalDateTime lockedUntil);
     
-    void updateProfileImageUrl(@Param("userId") Integer userId, @Param("profileImageUrl") String profileImageUrl);
+    void updateProfileImageUrl(@Param("userId") Long userId, @Param("profileImageUrl") String profileImageUrl);
 
 }

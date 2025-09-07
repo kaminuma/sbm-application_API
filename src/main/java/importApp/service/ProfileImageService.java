@@ -110,7 +110,7 @@ public class ProfileImageService {
             String imageUrl = baseUrl + "/" + newFilename;
             
             // DBを更新
-            userMapper.updateProfileImageUrl(Integer.parseInt(userId), imageUrl);
+            userMapper.updateProfileImageUrl(Long.parseLong(userId), imageUrl);
             
             logger.info("Profile image uploaded successfully for user {}: {}", userId, imageUrl);
             
@@ -148,7 +148,7 @@ public class ProfileImageService {
             }
             
             // プロフィール画像URLをnullに設定
-            userMapper.updateProfileImageUrl(Integer.parseInt(userId), null);
+            userMapper.updateProfileImageUrl(Long.parseLong(userId), null);
             
             logger.info("Profile image deleted for user {}", userId);
             

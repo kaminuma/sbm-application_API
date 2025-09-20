@@ -1,7 +1,7 @@
 -- AI API利用制限テーブル作成（将来の拡張を考慮した汎用名）
 CREATE TABLE ai_api_usage_limits (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT NOT NULL,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
     provider VARCHAR(50) NOT NULL DEFAULT 'gemini',
     date DATE NOT NULL,
     daily_count INT NOT NULL DEFAULT 0,

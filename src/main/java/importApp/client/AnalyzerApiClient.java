@@ -53,7 +53,7 @@ public class AnalyzerApiClient {
             );
             return response.getBody();
         } catch (Exception e) {
-            throw new RuntimeException("Error calling Analyzer API: " + e.getMessage(), e);
+            throw new RuntimeException("データ分析サービスとの通信でエラーが発生しました。", e);
         }
     }
 }

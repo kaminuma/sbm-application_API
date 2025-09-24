@@ -48,11 +48,11 @@ public class JwtService {
                     .parseClaimsJws(token.replace("Bearer ", ""))
                     .getBody();
         } catch (MalformedJwtException e) {
-            throw new IllegalArgumentException("Invalid JWT token format", e);
+            throw new IllegalArgumentException("Invalid JWT token format");
         } catch (ExpiredJwtException e) {
-            throw new IllegalArgumentException("JWT token has expired", e);
+            throw new IllegalArgumentException("JWT token has expired");
         } catch (Exception e) {
-            throw new IllegalArgumentException("Failed to parse JWT token", e);
+            throw new IllegalArgumentException("Failed to parse JWT token");
         }
     }
 }

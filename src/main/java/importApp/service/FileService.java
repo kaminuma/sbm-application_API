@@ -108,7 +108,7 @@ public class FileService {
 
             return "success";
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("ファイル処理中にエラーが発生しました。");
         }
     }
     // LocalDateTime を Date に変換するメソッドを作成

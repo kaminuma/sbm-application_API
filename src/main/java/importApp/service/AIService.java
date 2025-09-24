@@ -80,7 +80,7 @@ public class AIService {
             logger.error("AI分析処理エラー", e);
             AIAnalysisResponseDto response = new AIAnalysisResponseDto();
             response.setSuccess(false);
-            response.setError("分析処理中にエラーが発生しました: " + e.getMessage());
+            response.setError("AI分析処理中にエラーが発生しました。しばらく待ってから再試行してください。");
             return response;
         }
     }
@@ -281,7 +281,7 @@ public class AIService {
             
         } catch (Exception e) {
             logger.error("Gemini API呼び出しエラー", e);
-            throw new RuntimeException("Gemini API呼び出しエラー: " + e.getMessage());
+            throw new RuntimeException("AI分析サービスとの通信でエラーが発生しました。");
         }
     }
 

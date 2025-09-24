@@ -126,7 +126,7 @@ public class ProfileImageService {
             logger.error("Failed to upload profile image for user {}", userId, e);
             return ProfileImageResponseDto.builder()
                 .success(false)
-                .message("画像のアップロードに失敗しました: " + e.getMessage())
+                .message("画像のアップロードに失敗しました。")
                 .build();
         }
     }
@@ -164,7 +164,7 @@ public class ProfileImageService {
             logger.error("Failed to delete profile image for user {}", userId, e);
             return ProfileImageResponseDto.builder()
                 .success(false)
-                .message("画像の削除に失敗しました: " + e.getMessage())
+                .message("画像の削除に失敗しました。")
                 .build();
         }
     }

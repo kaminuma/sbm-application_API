@@ -71,13 +71,13 @@ public class MoodRecordController extends BaseController {
             log.error("Validation error: {}", e.getMessage());
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
-            response.put("message", e.getMessage());
+            response.put("message", "入力データが正しくありません。入力内容を確認してください。");
             return ResponseEntity.badRequest().body(response);
         } catch (IllegalStateException e) {
             log.error("Business logic error: {}", e.getMessage());
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
-            response.put("message", e.getMessage());
+            response.put("message", "入力データが正しくありません。入力内容を確認してください。");
             return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
         }
     }
@@ -107,13 +107,13 @@ public class MoodRecordController extends BaseController {
             log.error("Validation error: {}", e.getMessage());
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
-            response.put("message", e.getMessage());
+            response.put("message", "入力データが正しくありません。入力内容を確認してください。");
             return ResponseEntity.badRequest().body(response);
         } catch (IllegalStateException e) {
             log.error("Business logic error: {}", e.getMessage());
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
-            response.put("message", e.getMessage());
+            response.put("message", "入力データが正しくありません。入力内容を確認してください。");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }

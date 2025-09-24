@@ -107,7 +107,7 @@ public class AIController extends BaseController {
             logger.warn("不正なリクエスト: {}", e.getMessage());
             AIAnalysisResponseDto errorResponse = new AIAnalysisResponseDto();
             errorResponse.setSuccess(false);
-            errorResponse.setError("リクエスト内容に不正があります: " + e.getMessage());
+            errorResponse.setError("リクエスト内容に不正があります。入力内容を確認してください。");
             return ResponseEntity.badRequest().body(errorResponse);
             
         } catch (Exception e) {

@@ -73,13 +73,13 @@ public class AuthController extends BaseController {
         } catch (AccountLockedException e) {
             logger.warn("Login attempt for locked account: {}", e.getMessage());
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put("error", "アカウントがロックされています。しばらく時間をおいてから再度お試しください。");
             errorResponse.put("errorType", "ACCOUNT_LOCKED");
             return ResponseEntity.status(HttpStatus.LOCKED).body(errorResponse); // 423 Locked
         } catch (BadCredentialsException e) {
             logger.warn("Failed login attempt: {}", e.getMessage());
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
+            errorResponse.put("error", "アカウントがロックされています。しばらく時間をおいてから再度お試しください。");
             errorResponse.put("errorType", "BAD_CREDENTIALS");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         } catch (Exception e) {
@@ -142,7 +142,7 @@ public class AuthController extends BaseController {
             // OAuth ユーザーのパスワード変更試行
             logger.warn("Invalid password change attempt: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(e.getMessage());
+                    .body("パスワードの変更ができませんでした。入力内容を確認してください。");
         } catch (ExpiredJwtException e) {
             // トークンが期限切れの場合
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

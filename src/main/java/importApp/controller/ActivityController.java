@@ -48,7 +48,7 @@ public class ActivityController extends BaseController {
             log.info("Activity created successfully: {}", createdActivity);
             return ResponseEntity.status(HttpStatus.CREATED).body("success");
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body("入力データが正しくありません。入力内容を確認してください。");
         }
     }
 
@@ -71,7 +71,7 @@ public class ActivityController extends BaseController {
             log.info("Activity update status for id {}: {}", activityId, isUpdated);
             return isUpdated ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body("入力データが正しくありません。入力内容を確認してください。");
         }
     }
 

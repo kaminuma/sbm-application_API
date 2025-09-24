@@ -38,7 +38,7 @@ public class FileUploadController extends BaseController {
         } catch (Exception e) {
             logger.error("ファイル処理中にエラーが発生しました: userId={}, error={}", userId, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("ファイルの処理中にエラーが発生しました: " + e.getMessage());
+                    .body("ファイルの処理中にエラーが発生しました。");
         }
     }
 }

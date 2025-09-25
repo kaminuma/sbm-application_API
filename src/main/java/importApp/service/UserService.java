@@ -18,9 +18,10 @@ import java.time.LocalDateTime;
 public class UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
-    
+
     private static final int MAX_LOGIN_ATTEMPTS = 5;
     private static final int LOCK_DURATION_MINUTES = 15;
+    private static final String DUMMY_PASSWORD_HASH = "$2y$12$L6XNHqlesFuFzyGG3t4CmeCaEGrR2.vU2JZyThnAXF92iKyn2kLJq";
 
     @Autowired
     private UserMapper userMapper;
@@ -38,18 +39,20 @@ public class UserService {
     // ログインユーザーを認証するメソッド（アカウントロック機能付き）
     public UserEntity loginUser(String username, String password) {
         UserEntity user = userMapper.findByUsername(username);
-        
+
         // ユーザーが存在しない場合
         if (user == null) {
             logger.warn("Login attempt for non-existent user: {}", username);
+            bCryptPasswordEncoder.matches(password, DUMMY_PASSWORD_HASH);
             return null;
         }
-        
+
         // アカウントがロックされているかチェック
         boolean wasLocked = isAccountLocked(user);
         if (wasLocked) {
+            bCryptPasswordEncoder.matches(password, DUMMY_PASSWORD_HASH);
             logger.warn("Login attempt for locked account: {}", username);
-            throw new AccountLockedException("アカウントがロックされています。" + 
+            throw new AccountLockedException("アカウントがロックされています。" +
                 getRemainingLockTime(user) + "分後に再度お試しください。");
         }
         

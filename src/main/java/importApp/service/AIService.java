@@ -251,7 +251,7 @@ public class AIService {
     private AIAnalysisResponseDto callGeminiAPI(String prompt) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("x-google-api-key", geminiApiKey);
+        headers.set("x-goog-api-key", geminiApiKey);
 
         // Gemini APIリクエストボディ構築
         Map<String, Object> requestBody = Map.of(

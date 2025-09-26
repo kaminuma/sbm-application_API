@@ -27,8 +27,9 @@ public class AIService {
     @Value("${gemini.api.key}")
     private String geminiApiKey;
     
-    @Value("${gemini.api.url:https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent}")
+    @Value("${gemini.api.url:https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent}")
     private String geminiApiUrl;
+
 
     private final RestTemplate restTemplate;
     private final ActivityService activityService;
@@ -250,8 +251,8 @@ public class AIService {
     private AIAnalysisResponseDto callGeminiAPI(String prompt) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("x-goog-api-key", geminiApiKey); // セキュリティ向上：ヘッダーでAPIキー送信
-        
+        headers.set("x-goog-api-key", geminiApiKey);
+
         // Gemini APIリクエストボディ構築
         Map<String, Object> requestBody = Map.of(
             "contents", List.of(Map.of("parts", List.of(Map.of("text", prompt)))),
@@ -280,7 +281,11 @@ public class AIService {
             }
             
         } catch (Exception e) {
-            logger.error("Gemini API呼び出しエラー", e);
+            logger.error("Gemini API呼び出しエラー: {}", e.getMessage(), e);
+            if (e instanceof org.springframework.web.client.HttpClientErrorException) {
+                org.springframework.web.client.HttpClientErrorException httpError = (org.springframework.web.client.HttpClientErrorException) e;
+                logger.error("HTTP Status: {}, Response Body: {}", httpError.getStatusCode(), httpError.getResponseBodyAsString());
+            }
             throw new RuntimeException("AI分析サービスとの通信でエラーが発生しました。");
         }
     }

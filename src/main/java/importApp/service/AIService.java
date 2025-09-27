@@ -27,7 +27,7 @@ public class AIService {
     @Value("${gemini.api.key}")
     private String geminiApiKey;
     
-    @Value("${gemini.api.url:https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent}")
+    @Value("${gemini.api.url:https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash-lite:generateContent}")
     private String geminiApiUrl;
 
 
@@ -258,7 +258,7 @@ public class AIService {
             "contents", List.of(Map.of("parts", List.of(Map.of("text", prompt)))),
             "generationConfig", Map.of(
                 "temperature", 0.7,
-                "maxOutputTokens", 1000
+                "maxOutputTokens", 2000
             )
         );
         
@@ -293,14 +293,39 @@ public class AIService {
     @SuppressWarnings("unchecked")
     private AIAnalysisResponseDto parseGeminiResponse(Map<String, Object> responseBody) {
         try {
+            logger.debug("Gemini APIレスポンス: {}", responseBody);
+
             List<Map<String, Object>> candidates = (List<Map<String, Object>>) responseBody.get("candidates");
             if (candidates == null || candidates.isEmpty()) {
                 throw new RuntimeException("Gemini APIから回答が得られませんでした");
             }
 
-            Map<String, Object> content = (Map<String, Object>) candidates.get(0).get("content");
+            Map<String, Object> candidate = candidates.get(0);
+            logger.debug("候補: {}", candidate);
+
+            // finishReasonをチェック
+            String finishReason = (String) candidate.get("finishReason");
+            if ("MAX_TOKENS".equals(finishReason)) {
+                throw new RuntimeException("レスポンスがトークン制限により途中で切れました。maxOutputTokensを増やしてください。");
+            }
+
+            Map<String, Object> content = (Map<String, Object>) candidate.get("content");
+            if (content == null) {
+                throw new RuntimeException("レスポンスにcontentが含まれていません");
+            }
+            logger.debug("コンテンツ: {}", content);
+
             List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
+            if (parts == null || parts.isEmpty()) {
+                throw new RuntimeException("レスポンスにpartsが含まれていません");
+            }
+            logger.debug("パーツ: {}", parts);
+
             String text = (String) parts.get(0).get("text");
+            if (text == null) {
+                throw new RuntimeException("レスポンスにtextが含まれていません");
+            }
+            logger.debug("テキスト: {}", text);
             
             // JSON部分を抽出
             String jsonText = extractJsonFromText(text);

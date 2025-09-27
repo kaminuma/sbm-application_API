@@ -293,7 +293,7 @@ public class AIService {
     @SuppressWarnings("unchecked")
     private AIAnalysisResponseDto parseGeminiResponse(Map<String, Object> responseBody) {
         try {
-            logger.info("Gemini APIレスポンス: {}", responseBody);
+            logger.debug("Gemini APIレスポンス: {}", responseBody);
 
             List<Map<String, Object>> candidates = (List<Map<String, Object>>) responseBody.get("candidates");
             if (candidates == null || candidates.isEmpty()) {
@@ -301,7 +301,7 @@ public class AIService {
             }
 
             Map<String, Object> candidate = candidates.get(0);
-            logger.info("候補: {}", candidate);
+            logger.debug("候補: {}", candidate);
 
             // finishReasonをチェック
             String finishReason = (String) candidate.get("finishReason");
@@ -313,19 +313,19 @@ public class AIService {
             if (content == null) {
                 throw new RuntimeException("レスポンスにcontentが含まれていません");
             }
-            logger.info("コンテンツ: {}", content);
+            logger.debug("コンテンツ: {}", content);
 
             List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
             if (parts == null || parts.isEmpty()) {
                 throw new RuntimeException("レスポンスにpartsが含まれていません");
             }
-            logger.info("パーツ: {}", parts);
+            logger.debug("パーツ: {}", parts);
 
             String text = (String) parts.get(0).get("text");
             if (text == null) {
                 throw new RuntimeException("レスポンスにtextが含まれていません");
             }
-            logger.info("テキスト: {}", text);
+            logger.debug("テキスト: {}", text);
             
             // JSON部分を抽出
             String jsonText = extractJsonFromText(text);

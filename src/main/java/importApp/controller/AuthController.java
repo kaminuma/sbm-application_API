@@ -7,9 +7,12 @@ import importApp.mapper.UserMapper;
 import importApp.model.ChangePasswordRequest;
 import importApp.model.LoginRequest;
 import importApp.model.LoginResponse;
+import importApp.model.RefreshTokenRequest;
 import importApp.security.JwtService;
 import importApp.service.UserService;
 import importApp.service.OAuth2SessionService;
+import importApp.service.RefreshTokenService;
+import importApp.entity.RefreshTokenEntity;
 import java.util.Map;
 import java.util.HashMap;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -38,6 +41,9 @@ public class AuthController extends BaseController {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private RefreshTokenService refreshTokenService;
+
     @PostMapping("/auth/register")
     public ResponseEntity<?> register(@RequestBody UserEntity user) {
         logger.info("Register request received");
@@ -62,8 +68,9 @@ public class AuthController extends BaseController {
             if (user != null) {
                 String userId = String.valueOf(user.getUser_id());
                 String token = jwtService.generateToken(userId);
+                RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(user.getUser_id());
                 logger.info("Login successful for user ID: {}", userId);
-                return ResponseEntity.ok(new LoginResponse(token, userId));
+                return ResponseEntity.ok(new LoginResponse(token, refreshToken.getToken(), userId));
             } else {
                 logger.warn("Login failed: Invalid username or password");
                 Map<String, String> errorResponse = new HashMap<>();
@@ -172,7 +179,8 @@ public class AuthController extends BaseController {
                         .body("Invalid or expired session");
             }
 
-            return ResponseEntity.ok(new LoginResponse(sessionData.getJwt(), sessionData.getUserId()));
+            RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(Long.valueOf(sessionData.getUserId()));
+            return ResponseEntity.ok(new LoginResponse(sessionData.getJwt(), refreshToken.getToken(), sessionData.getUserId()));
         } catch (Exception e) {
             logger.error("OAuth2 session processing error", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -248,6 +256,45 @@ public class AuthController extends BaseController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("An unexpected error occurred");
+        }
+    }
+
+    @PostMapping("/auth/refresh")
+    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
+        logger.info("Refresh token request received");
+
+        try {
+            RefreshTokenEntity newRefreshToken = refreshTokenService.rotateRefreshToken(request.getRefreshToken());
+
+            if (newRefreshToken == null) {
+                logger.warn("Invalid or expired refresh token");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Invalid or expired refresh token");
+            }
+
+            String newAccessToken = jwtService.generateToken(String.valueOf(newRefreshToken.getUser_id()));
+            logger.info("Token refreshed successfully for user ID: {}", newRefreshToken.getUser_id());
+
+            return ResponseEntity.ok(new LoginResponse(newAccessToken, newRefreshToken.getToken(), String.valueOf(newRefreshToken.getUser_id())));
+        } catch (Exception e) {
+            logger.error("Token refresh error", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Token refresh failed");
+        }
+    }
+
+    @PostMapping("/auth/logout")
+    public ResponseEntity<?> logout(@RequestBody RefreshTokenRequest request) {
+        logger.info("Logout request received");
+
+        try {
+            refreshTokenService.deleteRefreshToken(request.getRefreshToken());
+            logger.info("User logged out successfully");
+            return ResponseEntity.ok("Logged out successfully");
+        } catch (Exception e) {
+            logger.error("Logout error", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Logout failed");
         }
     }
 

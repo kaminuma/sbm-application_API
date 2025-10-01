@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="importApp.mapper.RefreshTokenMapper">
+
+    <insert id="insertRefreshToken" parameterType="importApp.entity.RefreshTokenEntity" useGeneratedKeys="true" keyProperty="refresh_token_id">
+        INSERT INTO refresh_tokens (user_id, token, expires_at, created_at)
+        VALUES (#{user_id}, #{token}, #{expires_at}, #{created_at})
+    </insert>
+
+    <select id="findByToken" resultType="importApp.entity.RefreshTokenEntity">
+        SELECT refresh_token_id, user_id, token, expires_at, created_at
+        FROM refresh_tokens
+        WHERE token = #{token}
+    </select>
+
+    <select id="findByUserId" resultType="importApp.entity.RefreshTokenEntity">
+        SELECT refresh_token_id, user_id, token, expires_at, created_at
+        FROM refresh_tokens
+        WHERE user_id = #{userId}
+    </select>
+
+    <delete id="deleteByToken">
+        DELETE FROM refresh_tokens
+        WHERE token = #{token}
+    </delete>
+
+    <delete id="deleteByUserId">
+        DELETE FROM refresh_tokens
+        WHERE user_id = #{userId}
+    </delete>
+
+    <delete id="deleteExpiredTokens">
+        DELETE FROM refresh_tokens
+        WHERE expires_at &lt; #{now}
+    </delete>
+
+</mapper>

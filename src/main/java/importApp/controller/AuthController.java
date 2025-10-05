@@ -86,7 +86,7 @@ public class AuthController extends BaseController {
         } catch (BadCredentialsException e) {
             logger.warn("Failed login attempt: {}", e.getMessage());
             Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "アカウントがロックされています。しばらく時間をおいてから再度お試しください。");
+            errorResponse.put("error", e.getMessage());
             errorResponse.put("errorType", "BAD_CREDENTIALS");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         } catch (Exception e) {

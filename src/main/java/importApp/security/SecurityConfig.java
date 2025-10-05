@@ -38,6 +38,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/api/v1/auth/register", "/api/v1/auth/login").permitAll() // 登録とログインは全てのユーザーに許可
+                .antMatchers("/api/v1/auth/refresh", "/api/v1/auth/logout").permitAll() // リフレッシュトークン関連エンドポイント許可
                 .antMatchers("/api/v1/auth/oauth2/session").permitAll() // OAuth2セッション取得許可
                 .antMatchers("/oauth2/**", "/login/oauth2/**").permitAll() // OAuth2エンドポイント許可
                 .anyRequest().authenticated() // それ以外は認証が必要

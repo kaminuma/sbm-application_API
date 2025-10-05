@@ -17,7 +17,7 @@ public class RefreshTokenService {
     private RefreshTokenMapper refreshTokenMapper;
 
     private static final int REFRESH_TOKEN_LENGTH = 32;
-    private static final int REFRESH_TOKEN_VALIDITY_MINUTES = 5;
+    private static final int REFRESH_TOKEN_VALIDITY_DAYS = 30;
     private static final int MAX_TOKENS_PER_USER = 5; // 1ユーザーあたりの最大デバイス数
 
     public RefreshTokenEntity createRefreshToken(Long userId) {
@@ -33,7 +33,7 @@ public class RefreshTokenService {
         RefreshTokenEntity refreshToken = new RefreshTokenEntity();
         refreshToken.setUser_id(userId);
         refreshToken.setToken(generateSecureToken());
-        refreshToken.setExpires_at(LocalDateTime.now().plusMinutes(REFRESH_TOKEN_VALIDITY_MINUTES));
+        refreshToken.setExpires_at(LocalDateTime.now().plusDays(REFRESH_TOKEN_VALIDITY_DAYS));
         refreshToken.setDeviceType(deviceType.getValue());
         refreshToken.setDeviceInfo(deviceInfo != null ? deviceInfo : userAgent);
         refreshToken.setIpAddress(ipAddress);

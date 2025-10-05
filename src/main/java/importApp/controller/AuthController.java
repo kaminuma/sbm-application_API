@@ -15,6 +15,8 @@ import importApp.service.RefreshTokenService;
 import importApp.entity.RefreshTokenEntity;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.SignatureException;
 import org.slf4j.Logger;
@@ -59,7 +61,7 @@ public class AuthController extends BaseController {
     }
 
     @PostMapping("/auth/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
         logger.info("Login request received for user: {}", loginRequest.getUsername());
 
         try {
@@ -68,8 +70,15 @@ public class AuthController extends BaseController {
             if (user != null) {
                 String userId = String.valueOf(user.getUser_id());
                 String token = jwtService.generateToken(userId);
-                RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(user.getUser_id());
-                logger.info("Login successful for user ID: {}", userId);
+
+                // デバイス情報を取得
+                String userAgent = request.getHeader("User-Agent");
+                String ipAddress = getClientIpAddress(request);
+                String deviceInfo = userAgent != null ? userAgent.substring(0, Math.min(userAgent.length(), 200)) : null;
+
+                RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(
+                    user.getUser_id(), userAgent, ipAddress, deviceInfo);
+                logger.info("Login successful for user ID: {} from device: {}", userId, deviceInfo);
                 return ResponseEntity.ok(new LoginResponse(token, refreshToken.getToken(), userId));
             } else {
                 logger.warn("Login failed: Invalid username or password");
@@ -167,19 +176,25 @@ public class AuthController extends BaseController {
     }
 
     @PostMapping("/auth/oauth2/session")
-    public ResponseEntity<?> getOAuth2Session(@RequestParam String sessionId) {
+    public ResponseEntity<?> getOAuth2Session(@RequestParam String sessionId, HttpServletRequest request) {
         logger.info("OAuth2 session request received: sessionId={}", sessionId);
 
         try {
             OAuth2SessionService.SessionData sessionData = sessionService.getAndRemoveSession(sessionId);
-            
+
             if (sessionData == null) {
                 logger.warn("Invalid or expired session: {}", sessionId);
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body("Invalid or expired session");
             }
 
-            RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(Long.valueOf(sessionData.getUserId()));
+            // デバイス情報を取得
+            String userAgent = request.getHeader("User-Agent");
+            String ipAddress = getClientIpAddress(request);
+            String deviceInfo = userAgent != null ? userAgent.substring(0, Math.min(userAgent.length(), 200)) : null;
+
+            RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(
+                Long.valueOf(sessionData.getUserId()), userAgent, ipAddress, deviceInfo);
             return ResponseEntity.ok(new LoginResponse(sessionData.getJwt(), refreshToken.getToken(), sessionData.getUserId()));
         } catch (Exception e) {
             logger.error("OAuth2 session processing error", e);
@@ -295,6 +310,71 @@ public class AuthController extends BaseController {
             logger.error("Logout error", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Logout failed");
+        }
+    }
+
+    @GetMapping("/auth/devices")
+    public ResponseEntity<?> getActiveDevices(@RequestHeader("Authorization") String authHeader) {
+        logger.info("Get active devices request received");
+
+        try {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Invalid Authorization header format");
+            }
+            String token = authHeader.replace("Bearer ", "");
+            String userId = jwtService.extractUserId(token);
+
+            List<RefreshTokenEntity> activeTokens = refreshTokenService.getUserActiveTokens(Long.valueOf(userId));
+
+            // セキュリティのためトークン値は除外してレスポンス作成
+            List<Map<String, Object>> deviceList = activeTokens.stream()
+                .map(refreshToken -> {
+                    Map<String, Object> device = new HashMap<>();
+                    device.put("deviceType", refreshToken.getDeviceType());
+                    device.put("deviceInfo", refreshToken.getDeviceInfo());
+                    device.put("ipAddress", refreshToken.getIpAddress());
+                    device.put("lastUsedAt", refreshToken.getLastUsedAt());
+                    device.put("createdAt", refreshToken.getCreated_at());
+                    return device;
+                })
+                .collect(java.util.stream.Collectors.toList());
+
+            return ResponseEntity.ok(Map.of("devices", deviceList));
+        } catch (ExpiredJwtException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token has expired");
+        } catch (SignatureException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token signature");
+        } catch (Exception e) {
+            logger.error("Get active devices error", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to get active devices");
+        }
+    }
+
+    @PostMapping("/auth/logout-all")
+    public ResponseEntity<?> logoutAllDevices(@RequestHeader("Authorization") String authHeader) {
+        logger.info("Logout all devices request received");
+
+        try {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Invalid Authorization header format");
+            }
+            String token = authHeader.replace("Bearer ", "");
+            String userId = jwtService.extractUserId(token);
+
+            refreshTokenService.deleteRefreshTokenByUserId(Long.valueOf(userId));
+            logger.info("All devices logged out for user ID: {}", userId);
+            return ResponseEntity.ok("Logged out from all devices successfully");
+        } catch (ExpiredJwtException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token has expired");
+        } catch (SignatureException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token signature");
+        } catch (Exception e) {
+            logger.error("Logout all devices error", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to logout all devices");
         }
     }
 

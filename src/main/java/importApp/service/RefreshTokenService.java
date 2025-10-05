@@ -15,7 +15,7 @@ public class RefreshTokenService {
     private RefreshTokenMapper refreshTokenMapper;
 
     private static final int REFRESH_TOKEN_LENGTH = 32;
-    private static final int REFRESH_TOKEN_VALIDITY_DAYS = 30;
+    private static final int REFRESH_TOKEN_VALIDITY_MINUTES = 5;
 
     public RefreshTokenEntity createRefreshToken(Long userId) {
         // 既存のリフレッシュトークンを削除（ユーザーごとに1つのみ）
@@ -24,7 +24,7 @@ public class RefreshTokenService {
         RefreshTokenEntity refreshToken = new RefreshTokenEntity();
         refreshToken.setUser_id(userId);
         refreshToken.setToken(generateSecureToken());
-        refreshToken.setExpires_at(LocalDateTime.now().plusDays(REFRESH_TOKEN_VALIDITY_DAYS));
+        refreshToken.setExpires_at(LocalDateTime.now().plusMinutes(REFRESH_TOKEN_VALIDITY_MINUTES));
 
         refreshTokenMapper.insertRefreshToken(refreshToken);
         return refreshToken;

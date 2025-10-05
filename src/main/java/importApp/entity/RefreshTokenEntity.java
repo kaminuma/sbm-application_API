@@ -24,8 +24,21 @@ public class RefreshTokenEntity {
     @Column(name = "created_at")
     private LocalDateTime created_at;
 
+    @Column(name = "device_info")
+    private String deviceInfo;
+
+    @Column(name = "device_type")
+    private String deviceType;
+
+    @Column(name = "ip_address")
+    private String ipAddress;
+
+    @Column(name = "last_used_at")
+    private LocalDateTime lastUsedAt;
+
     @PrePersist
     protected void onCreate() {
         created_at = LocalDateTime.now();
+        lastUsedAt = LocalDateTime.now();
     }
 }

@@ -73,6 +73,8 @@ public class AIService {
 
             // 3. プロンプト生成
             String prompt = generatePrompt(request, activities, moodRecords);
+            logger.info("プロンプトサイズ: {} 文字, 活動記録: {} 件, 気分記録: {} 件",
+                       prompt.length(), activities.size(), moodRecords.size());
 
             // 4. Gemini API呼び出し
             return callGeminiAPI(prompt);

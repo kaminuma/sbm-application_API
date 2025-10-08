@@ -12,9 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import java.util.concurrent.atomic.AtomicReference;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 
@@ -268,8 +265,6 @@ public class AIService {
             logger.info("Gemini Streaming API呼び出し開始");
 
             // WebClientでリアルタイムStreaming処理（DataBufferを使用）
-            AtomicReference<StringBuilder> fullResponse = new AtomicReference<>(new StringBuilder());
-
             String result = webClient.post()
                 .uri(geminiApiUrl)
                 .header("x-goog-api-key", geminiApiKey)
@@ -278,11 +273,12 @@ public class AIService {
                 .retrieve()
                 .bodyToFlux(DataBuffer.class)
                 .map(dataBuffer -> {
-                    String chunk = dataBuffer.toString(java.nio.charset.StandardCharsets.UTF_8);
-                    DataBufferUtils.release(dataBuffer);
-                    return chunk;
+                    try {
+                        return dataBuffer.toString(java.nio.charset.StandardCharsets.UTF_8);
+                    } finally {
+                        DataBufferUtils.release(dataBuffer);
+                    }
                 })
-                .doOnNext(chunk -> fullResponse.get().append(chunk))
                 .doOnComplete(() -> logger.info("ストリーミング受信完了"))
                 .doOnError(error -> logger.error("ストリーミングエラー: {}", error.getMessage()))
                 .reduce(new StringBuilder(), StringBuilder::append)

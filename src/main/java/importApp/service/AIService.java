@@ -7,11 +7,13 @@ import importApp.entity.MoodRecordEntity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -30,16 +32,16 @@ public class AIService {
     private String geminiApiUrl;
 
 
-    private final RestTemplate restTemplate;
+    private final WebClient webClient;
     private final ActivityService activityService;
     private final MoodRecordService moodRecordService;
     private final ObjectMapper objectMapper;
 
-    public AIService(RestTemplate restTemplate, 
+    public AIService(WebClient webClient,
                      ActivityService activityService,
                      MoodRecordService moodRecordService,
                      ObjectMapper objectMapper) {
-        this.restTemplate = restTemplate;
+        this.webClient = webClient;
         this.activityService = activityService;
         this.moodRecordService = moodRecordService;
         this.objectMapper = objectMapper;
@@ -250,10 +252,6 @@ public class AIService {
     }
 
     private AIAnalysisResponseDto callGeminiAPI(String prompt) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("x-goog-api-key", geminiApiKey);
-
         // Gemini APIリクエストボディ構築
         Map<String, Object> requestBody = Map.of(
             "contents", List.of(Map.of("parts", List.of(Map.of("text", prompt)))),
@@ -262,31 +260,35 @@ public class AIService {
                 "maxOutputTokens", 2000
             )
         );
-        
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-        
+
         try {
-            logger.info("Gemini API呼び出し開始");
-            ResponseEntity<String> response = restTemplate.exchange(
-                geminiApiUrl,  // URLからAPIキーパラメータを削除
-                HttpMethod.POST,
-                entity,
-                String.class
-            );
-            
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                return parseStreamingResponse(response.getBody());
-            } else {
-                logger.error("Gemini API異常レスポンス: {}", response.getStatusCode());
-                throw new RuntimeException("Gemini APIから異常なレスポンスが返されました");
-            }
-            
+            logger.info("Gemini Streaming API呼び出し開始");
+
+            // WebClientでリアルタイムStreaming処理（DataBufferを使用）
+            String result = webClient.post()
+                .uri(geminiApiUrl)
+                .header("x-goog-api-key", geminiApiKey)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToFlux(DataBuffer.class)
+                .map(dataBuffer -> {
+                    try {
+                        return dataBuffer.toString(java.nio.charset.StandardCharsets.UTF_8);
+                    } finally {
+                        DataBufferUtils.release(dataBuffer);
+                    }
+                })
+                .doOnComplete(() -> logger.info("ストリーミング受信完了"))
+                .doOnError(error -> logger.error("ストリーミングエラー: {}", error.getMessage()))
+                .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
+                .toString()
+                .block(); // 最終的な結果のみblock
+
+            return parseStreamingResponse(result);
+
         } catch (Exception e) {
             logger.error("Gemini API呼び出しエラー: {}", e.getMessage(), e);
-            if (e instanceof org.springframework.web.client.HttpClientErrorException) {
-                org.springframework.web.client.HttpClientErrorException httpError = (org.springframework.web.client.HttpClientErrorException) e;
-                logger.error("HTTP Status: {}, Response Body: {}", httpError.getStatusCode(), httpError.getResponseBodyAsString());
-            }
             throw new RuntimeException("AI分析サービスとの通信でエラーが発生しました。");
         }
     }
@@ -419,10 +421,6 @@ public class AIService {
         public List<GeminiCandidate> getCandidates() {
             return candidates;
         }
-
-        public void setCandidates(List<GeminiCandidate> candidates) {
-            this.candidates = candidates;
-        }
     }
 
     private static class GeminiCandidate {
@@ -430,10 +428,6 @@ public class AIService {
 
         public GeminiContent getContent() {
             return content;
-        }
-
-        public void setContent(GeminiContent content) {
-            this.content = content;
         }
     }
 
@@ -443,10 +437,6 @@ public class AIService {
         public List<GeminiPart> getParts() {
             return parts;
         }
-
-        public void setParts(List<GeminiPart> parts) {
-            this.parts = parts;
-        }
     }
 
     private static class GeminiPart {
@@ -454,10 +444,6 @@ public class AIService {
 
         public String getText() {
             return text;
-        }
-
-        public void setText(String text) {
-            this.text = text;
         }
     }
 }

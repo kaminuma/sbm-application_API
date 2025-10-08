@@ -13,6 +13,10 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import java.util.concurrent.atomic.AtomicReference;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -263,24 +267,29 @@ public class AIService {
         try {
             logger.info("Gemini Streaming API呼び出し開始");
 
-            // WebClientでリアルタイムStreaming処理
-            Flux<String> streamingFlux = webClient.post()
+            // WebClientでリアルタイムStreaming処理（DataBufferを使用）
+            AtomicReference<StringBuilder> fullResponse = new AtomicReference<>(new StringBuilder());
+
+            String result = webClient.post()
                 .uri(geminiApiUrl)
                 .header("x-goog-api-key", geminiApiKey)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .bodyValue(requestBody)
                 .retrieve()
-                .bodyToFlux(String.class);
-
-            // ストリーミングチャンクをリアルタイム処理
-            StringBuilder fullResponse = new StringBuilder();
-            streamingFlux
-                .doOnNext(fullResponse::append)
+                .bodyToFlux(DataBuffer.class)
+                .map(dataBuffer -> {
+                    String chunk = dataBuffer.toString(java.nio.charset.StandardCharsets.UTF_8);
+                    DataBufferUtils.release(dataBuffer);
+                    return chunk;
+                })
+                .doOnNext(chunk -> fullResponse.get().append(chunk))
                 .doOnComplete(() -> logger.info("ストリーミング受信完了"))
                 .doOnError(error -> logger.error("ストリーミングエラー: {}", error.getMessage()))
-                .blockLast(); // 同期的に完了を待つ
+                .reduce(new StringBuilder(), StringBuilder::append)
+                .map(StringBuilder::toString)
+                .block(); // 最終的な結果のみblock
 
-            return parseStreamingResponse(fullResponse.toString());
+            return parseStreamingResponse(result);
 
         } catch (Exception e) {
             logger.error("Gemini API呼び出しエラー: {}", e.getMessage(), e);

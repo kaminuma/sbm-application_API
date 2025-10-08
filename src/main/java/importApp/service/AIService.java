@@ -281,8 +281,8 @@ public class AIService {
                 })
                 .doOnComplete(() -> logger.info("ストリーミング受信完了"))
                 .doOnError(error -> logger.error("ストリーミングエラー: {}", error.getMessage()))
-                .reduce(new StringBuilder(), StringBuilder::append)
-                .map(StringBuilder::toString)
+                .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
+                .toString()
                 .block(); // 最終的な結果のみblock
 
             return parseStreamingResponse(result);

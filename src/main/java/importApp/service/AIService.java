@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,7 @@ public class AIService {
     @Value("${gemini.api.key}")
     private String geminiApiKey;
     
-    @Value("${gemini.api.url:https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash-lite:generateContent}")
+    @Value("${gemini.api.url:https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash-lite:streamGenerateContent}")
     private String geminiApiUrl;
 
 
@@ -50,7 +49,7 @@ public class AIService {
         
         // Gemini APIキー検証
         if (!isValidGeminiApiKey()) {
-            logger.error("Invalid or missing Gemini API key");
+            logger.error("Gemini APIキーが無効または未設定です");
             throw new IllegalStateException("AI service is not available due to configuration error");
         }
         
@@ -268,15 +267,15 @@ public class AIService {
         
         try {
             logger.info("Gemini API呼び出し開始");
-            ResponseEntity<Map> response = restTemplate.exchange(
+            ResponseEntity<String> response = restTemplate.exchange(
                 geminiApiUrl,  // URLからAPIキーパラメータを削除
                 HttpMethod.POST,
                 entity,
-                Map.class
+                String.class
             );
             
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                return parseGeminiResponse(response.getBody());
+                return parseStreamingResponse(response.getBody());
             } else {
                 logger.error("Gemini API異常レスポンス: {}", response.getStatusCode());
                 throw new RuntimeException("Gemini APIから異常なレスポンスが返されました");
@@ -292,70 +291,59 @@ public class AIService {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private AIAnalysisResponseDto parseGeminiResponse(Map<String, Object> responseBody) {
+    private AIAnalysisResponseDto parseStreamingResponse(String streamingResponse) {
         try {
-            logger.debug("Gemini APIレスポンス: {}", responseBody);
+            logger.info("ストリーミングレスポンス解析開始");
 
-            List<Map<String, Object>> candidates = (List<Map<String, Object>>) responseBody.get("candidates");
-            if (candidates == null || candidates.isEmpty()) {
-                throw new RuntimeException("Gemini APIから回答が得られませんでした");
+            // 型安全なストリーミングレスポンス解析
+            TypeReference<List<GeminiStreamChunk>> typeRef = new TypeReference<List<GeminiStreamChunk>>() {};
+            List<GeminiStreamChunk> chunks = objectMapper.readValue(streamingResponse, typeRef);
+
+            // 各チャンクのテキストを結合
+            StringBuilder fullText = new StringBuilder();
+            for (GeminiStreamChunk chunk : chunks) {
+                if (chunk != null && chunk.getCandidates() != null && !chunk.getCandidates().isEmpty()) {
+                    GeminiCandidate candidate = chunk.getCandidates().get(0);
+                    if (candidate != null && candidate.getContent() != null &&
+                        candidate.getContent().getParts() != null &&
+                        !candidate.getContent().getParts().isEmpty()) {
+                        String text = candidate.getContent().getParts().get(0).getText();
+                        if (text != null) {
+                            fullText.append(text);
+                        }
+                    }
+                }
             }
 
-            Map<String, Object> candidate = candidates.get(0);
-            logger.debug("候補: {}", candidate);
+            logger.info("ストリーミングテキスト結合完了: {} 文字", fullText.length());
 
-            // finishReasonをチェック
-            String finishReason = (String) candidate.get("finishReason");
-            if ("MAX_TOKENS".equals(finishReason)) {
-                throw new RuntimeException("レスポンスがトークン制限により途中で切れました。maxOutputTokensを増やしてください。");
-            }
+            // 結合されたテキストからJSON部分を抽出
+            String jsonText = extractJsonFromText(fullText.toString());
 
-            Map<String, Object> content = (Map<String, Object>) candidate.get("content");
-            if (content == null) {
-                throw new RuntimeException("レスポンスにcontentが含まれていません");
-            }
-            logger.debug("コンテンツ: {}", content);
+            // JSONをパース
+            TypeReference<Map<String, String>> mapTypeRef = new TypeReference<Map<String, String>>() {};
+            Map<String, String> insights = objectMapper.readValue(jsonText, mapTypeRef);
 
-            List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
-            if (parts == null || parts.isEmpty()) {
-                throw new RuntimeException("レスポンスにpartsが含まれていません");
-            }
-            logger.debug("パーツ: {}", parts);
-
-            String text = (String) parts.get(0).get("text");
-            if (text == null) {
-                throw new RuntimeException("レスポンスにtextが含まれていません");
-            }
-            logger.debug("テキスト: {}", text);
-            
-            // JSON部分を抽出
-            String jsonText = extractJsonFromText(text);
-            
-            // JSONをパース（型安全性向上）
-            TypeReference<Map<String, String>> typeRef = new TypeReference<Map<String, String>>() {};
-            Map<String, String> insights = objectMapper.readValue(jsonText, typeRef);
-            
             // レスポンス構築
             AIAnalysisResponseDto response = new AIAnalysisResponseDto();
             response.setSuccess(true);
-            
+
             AIAnalysisResponseDto.AIInsightData data = new AIAnalysisResponseDto.AIInsightData();
             data.setOverallSummary(insights.get("overall_summary"));
             data.setMoodInsights(insights.get("mood_insights"));
             data.setActivityInsights(insights.get("activity_insights"));
             data.setRecommendations(insights.get("recommendations"));
-            
+
             response.setData(data);
-            
-            logger.info("Gemini APIレスポンス解析完了");
+
+            logger.info("ストリーミングレスポンス解析完了");
             return response;
-            
+
         } catch (Exception e) {
-            logger.error("Gemini APIレスポンス解析エラー", e);
+            logger.error("ストリーミングレスポンス解析エラー", e);
             AIAnalysisResponseDto response = new AIAnalysisResponseDto();
             response.setSuccess(false);
-            response.setError("AI分析結果の解析に失敗しました");
+            response.setError("AI分析結果の処理中にエラーが発生しました。");
             return response;
         }
     }
@@ -422,5 +410,54 @@ public class AIService {
         }
         
         return true;
+    }
+
+    // 型安全なGeminiストリーミングレスポンス用クラス
+    private static class GeminiStreamChunk {
+        private List<GeminiCandidate> candidates;
+
+        public List<GeminiCandidate> getCandidates() {
+            return candidates;
+        }
+
+        public void setCandidates(List<GeminiCandidate> candidates) {
+            this.candidates = candidates;
+        }
+    }
+
+    private static class GeminiCandidate {
+        private GeminiContent content;
+
+        public GeminiContent getContent() {
+            return content;
+        }
+
+        public void setContent(GeminiContent content) {
+            this.content = content;
+        }
+    }
+
+    private static class GeminiContent {
+        private List<GeminiPart> parts;
+
+        public List<GeminiPart> getParts() {
+            return parts;
+        }
+
+        public void setParts(List<GeminiPart> parts) {
+            this.parts = parts;
+        }
+    }
+
+    private static class GeminiPart {
+        private String text;
+
+        public String getText() {
+            return text;
+        }
+
+        public void setText(String text) {
+            this.text = text;
+        }
     }
 }

@@ -3,7 +3,7 @@
 [![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/kaminuma/sbm-application_API)
+[![Version](https://img.shields.io/badge/version-0.8.0-blue.svg)](https://github.com/kaminuma/sbm-application_API)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.7.8-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Java](https://img.shields.io/badge/Java-11-orange.svg)](https://openjdk.java.net/)
 

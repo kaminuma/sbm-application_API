@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -36,6 +37,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // ステートレスに設定
                 .and()
+                // セキュリティヘッダーの設定
+                .headers(headers -> headers
+                    .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'none'; frame-ancestors 'none'")) // API用CSP: すべてのコンテンツ読み込みを拒否し、フレーム埋め込みも禁止
+                    .httpStrictTransportSecurity(hsts -> hsts
+                        .includeSubDomains(true)
+                        .maxAgeInSeconds(31536000) // 1年間HTTPS強制
+                    )
+                    .contentTypeOptions() // X-Content-Type-Options: nosniff
+                    .and()
+                    .frameOptions().deny() // X-Frame-Options: DENY
+                    .addHeaderWriter(new ReferrerPolicyHeaderWriter(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                )
                 .authorizeRequests()
                 .antMatchers("/api/v1/auth/register", "/api/v1/auth/login").permitAll() // 登録とログインは全てのユーザーに許可
                 .antMatchers("/api/v1/auth/refresh", "/api/v1/auth/logout").permitAll() // リフレッシュトークン関連エンドポイント許可

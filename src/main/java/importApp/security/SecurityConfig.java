@@ -39,7 +39,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 // セキュリティヘッダーの設定
                 .headers(headers -> headers
-                    .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'none'")) // API用CSP: すべてのコンテンツ読み込みを拒否
+                    .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'none'; frame-ancestors 'none'")) // API用CSP: すべてのコンテンツ読み込みを拒否し、フレーム埋め込みも禁止
                     .httpStrictTransportSecurity(hsts -> hsts
                         .includeSubDomains(true)
                         .maxAgeInSeconds(31536000) // 1年間HTTPS強制
